@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 16-09-2025 a las 06:20:40
+-- Tiempo de generación: 26-10-2025 a las 03:43:21
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -64,7 +64,34 @@ INSERT INTO `alertas` (`id_alerta`, `mensaje`, `fecha`, `tipo`) VALUES
 (12, '📅 Se creó una reserva para el 2025-09-18 a las 06:59:00 en la mesa 1', '2025-09-15 18:56:23', 'reserva'),
 (13, '👤 Nuevo usuario registrado: ANDRES ARIAS', '2025-09-15 20:12:03', 'usuario'),
 (14, '📅 Se creó una reserva para el 2025-09-18 a las 12:35:00 en la mesa 2', '2025-09-15 21:32:39', 'reserva'),
-(16, '❌ El pedido N° 1 fue cancelado', '2025-09-15 22:27:32', 'pedido');
+(16, '❌ El pedido N° 1 fue cancelado', '2025-09-15 22:27:32', 'pedido'),
+(0, '? Se creó una reserva para el 2025-10-21 a las 13:00:00 para 4 personas, ', '2025-10-20 21:01:34', 'reserva'),
+(0, '❌ Se canceló la reserva N° 4', '2025-10-20 22:21:14', 'reserva'),
+(0, '? Se creó una reserva para el 2025-10-22 a las 11:30:00 para 3 personas, ', '2025-10-20 22:33:05', 'reserva'),
+(0, '❌ Se canceló la reserva N° 6', '2025-10-20 23:03:53', 'reserva'),
+(0, '❌ Se canceló la reserva N° 7', '2025-10-20 23:04:01', 'reserva'),
+(0, '? Se creó una reserva para el 2025-03-22 a las 11:11:00 para 2 personas, ', '2025-10-20 23:06:49', 'reserva'),
+(0, '❌ Se canceló la reserva N° 10', '2025-10-20 23:07:01', 'reserva'),
+(0, '? Se creó una reserva para el 2025-12-11 a las 12:00pm-2:00pm para 9 personas, ', '2025-10-21 15:31:46', 'reserva'),
+(0, '? Se creó una reserva para el 2025-10-21 a las 12:00pm-2:00pm para 6 personas, ', '2025-10-21 18:48:04', 'reserva'),
+(0, '? Se creó una reserva para el 2025-10-21 a las 12:30pm-2:30pm para 10 personas, ', '2025-10-21 18:48:48', 'reserva'),
+(0, '❌ Se canceló la reserva N° 3', '2025-10-22 23:51:21', 'reserva'),
+(0, '❌ Se canceló la reserva N° 5', '2025-10-22 23:51:21', 'reserva'),
+(0, '❌ Se canceló la reserva N° 11', '2025-10-22 23:51:21', 'reserva'),
+(0, '❌ Se canceló la reserva N° 12', '2025-10-22 23:51:21', 'reserva'),
+(0, '❌ Se canceló la reserva N° 13', '2025-10-22 23:51:21', 'reserva'),
+(0, '? Se creó una reserva para el 2025-10-23 a las  para 11 personas, ', '2025-10-23 00:33:03', 'reserva'),
+(0, '❌ Se canceló la reserva N° 14', '2025-10-23 00:33:55', 'reserva'),
+(0, '? Se creó una reserva para el 2025-12-11 a las  para 12 personas, ', '2025-10-23 00:44:49', 'reserva'),
+(0, '❌ Se canceló la reserva N° 15', '2025-10-23 00:45:11', 'reserva'),
+(0, '? Se creó una reserva para el 2025-10-23 a las 12:00pm-2:00pm para 11 personas, ', '2025-10-23 00:49:53', 'reserva'),
+(0, '? Se creó una reserva para el 2025-10-24 a las 12:00pm-2:00pm para 10 personas, ', '2025-10-23 00:57:00', 'reserva'),
+(0, '❌ Se canceló la reserva N° 18', '2025-10-23 00:57:16', 'reserva'),
+(0, '? Se creó una reserva para el 2025-12-11 a las 2:00pm-4:00pm para 4 personas, ', '2025-10-23 01:21:14', 'reserva'),
+(0, '? Se creó una reserva para el 2025-10-25 a las 12:30pm-2:30pm para 7 personas, ', '2025-10-24 00:17:10', 'reserva'),
+(0, '❌ Se canceló la reserva N° 17', '2025-10-24 00:18:18', 'reserva'),
+(0, '? Se creó una reserva para el 2025-10-31 a las 2:00pm-4:00pm para 11 personas, ', '2025-10-24 00:19:27', 'reserva'),
+(0, '? Se creó una reserva para el 2025-11-01 a las 1:00pm-3:00pm para 12 personas, ', '2025-10-24 00:54:58', 'reserva');
 
 -- --------------------------------------------------------
 
@@ -114,6 +141,20 @@ INSERT INTO `detalle_pedido` (`id_detalle`, `cod_pedido`, `cod_producto`, `canti
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `detalle_pedido_restaurante`
+--
+
+CREATE TABLE `detalle_pedido_restaurante` (
+  `id_detalle_pedido_restaurante` int(11) NOT NULL,
+  `id_pago_restaurante` int(11) DEFAULT NULL,
+  `id_producto_em` int(11) DEFAULT NULL,
+  `cantidad` int(11) NOT NULL,
+  `precio_unitario` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `domicilios`
 --
 
@@ -147,7 +188,9 @@ INSERT INTO `historial_pedidos` (`id_historial`, `id_pedido`, `estado`, `fecha`,
 (2, 1, 'entregado', '0000-00-00', '00:00:00', '2025-09-15 22:27:30'),
 (3, 1, 'cancelado', '0000-00-00', '00:00:00', '2025-09-15 22:27:32'),
 (4, 1, 'entregado', '0000-00-00', '00:00:00', '2025-09-15 22:27:34'),
-(5, 1, 'pendiente', '0000-00-00', '00:00:00', '2025-09-15 22:27:35');
+(5, 1, 'pendiente', '0000-00-00', '00:00:00', '2025-09-15 22:27:35'),
+(0, 1, 'entregado', '0000-00-00', '00:00:00', '2025-10-24 01:22:03'),
+(0, 1, 'pendiente', '0000-00-00', '00:00:00', '2025-10-24 01:22:03');
 
 -- --------------------------------------------------------
 
@@ -173,18 +216,30 @@ CREATE TABLE `insumos` (
 
 CREATE TABLE `mesas` (
   `id_mesa` int(11) NOT NULL,
-  `numero` int(11) NOT NULL,
-  `capacidad` int(11) NOT NULL,
-  `estado` enum('Disponible','No disponible') DEFAULT 'Disponible'
+  `estado` enum('ocupada','libre') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `mesas`
 --
 
-INSERT INTO `mesas` (`id_mesa`, `numero`, `capacidad`, `estado`) VALUES
-(1, 0, 4, 'Disponible'),
-(2, 21, 12, 'Disponible');
+INSERT INTO `mesas` (`id_mesa`, `estado`) VALUES
+(1, ''),
+(2, '');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `pagos_restaurante`
+--
+
+CREATE TABLE `pagos_restaurante` (
+  `id_pago_restaurante` int(11) NOT NULL,
+  `id_mesa` int(11) DEFAULT NULL,
+  `fecha` date NOT NULL,
+  `hora` time NOT NULL,
+  `total` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -312,28 +367,53 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `productos_empleados`
+--
+
+CREATE TABLE `productos_empleados` (
+  `id_producto_em` int(11) NOT NULL,
+  `nombre` varchar(150) NOT NULL,
+  `precio` decimal(10,2) NOT NULL,
+  `descripcion` text DEFAULT NULL,
+  `id_categoria` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `productos_empleados`
+--
+
+INSERT INTO `productos_empleados` (`id_producto_em`, `nombre`, `precio`, `descripcion`, `id_categoria`) VALUES
+(2, 'queso ', 11111.00, 'queooo', 1);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `reservas`
 --
 
 CREATE TABLE `reservas` (
   `id_reserva` int(11) NOT NULL,
   `fecha` date DEFAULT NULL,
-  `hora` time DEFAULT NULL,
-  `cant_personas` int(11) NOT NULL,
-  `estado` enum('disponible','no disponible') DEFAULT 'disponible',
-  `cod_mesa` int(11) DEFAULT NULL,
+  `hora` enum('','11:30m-1:30pm','12:00pm-2:00pm','12:30pm-2:30pm','1:00pm-3:00pm','1:30pm-3:30pm','2:00pm-4:00pm','2:30pm-4:30pm') NOT NULL,
+  `cant_personas` enum('','1','2','3','4','5','6','7','8','9','10','11','12') DEFAULT NULL,
+  `estado` enum('Pendiente','confirmada','Completada') DEFAULT NULL,
   `telefono` varchar(20) DEFAULT NULL,
-  `id_usuario` int(11) DEFAULT NULL
+  `id_usuario` int(11) DEFAULT NULL,
+  `nombre` varchar(100) DEFAULT NULL,
+  `documento_identidad` varchar(50) DEFAULT NULL,
+  `tipo_evento` enum('','Almuerzo','Reunión','Celebración','Otro') DEFAULT NULL,
+  `comentarios` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `reservas`
 --
 
-INSERT INTO `reservas` (`id_reserva`, `fecha`, `hora`, `cant_personas`, `estado`, `cod_mesa`, `telefono`, `id_usuario`) VALUES
-(3, '2025-09-14', '18:00:00', 4, 'disponible', 1, NULL, NULL),
-(4, '2025-09-18', '06:59:00', 1, '', 1, '321123', 16),
-(5, '2025-09-18', '12:35:00', 10, '', 2, '321123', 16);
+INSERT INTO `reservas` (`id_reserva`, `fecha`, `hora`, `cant_personas`, `estado`, `telefono`, `id_usuario`, `nombre`, `documento_identidad`, `tipo_evento`, `comentarios`) VALUES
+(19, '2025-12-11', '2:00pm-4:00pm', '4', 'Pendiente', '3202995114', 16, 'aaa', '111', 'Almuerzo', 'hola'),
+(20, '2025-10-25', '12:30pm-2:30pm', '7', 'confirmada', '3202995114', 16, 'Tommy ', '1111111', 'Almuerzo', '# app.py unificado (comentado por bloques y funciones) from flask import (     Flask, render_template, request, redirect, url_for, session,     jsonify, flash, send_file ) from flask_mysqldb import MySQL from flask_mail import Mail   # falta message # fro'),
+(21, '2025-10-31', '2:00pm-4:00pm', '11', 'Pendiente', '3202995114', 16, 'Tommy ', '111', 'Almuerzo', 'hola'),
+(22, '2025-11-01', '1:00pm-3:00pm', '12', 'Pendiente', '3202995114', 16, 'aa', '332222', 'Otro', 'a');
 
 --
 -- Disparadores `reservas`
@@ -352,8 +432,12 @@ DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `trg_alerta_reserva_creada` AFTER INSERT ON `reservas` FOR EACH ROW BEGIN
     INSERT INTO alertas(mensaje, fecha, tipo)
-    VALUES (CONCAT('? Se creó una reserva para el ', NEW.fecha, ' a las ', NEW.hora, 
-                   ' en la mesa ', NEW.cod_mesa), NOW(), 'reserva');
+    VALUES (
+        CONCAT('? Se creó una reserva para el ', NEW.fecha, ' a las ', NEW.hora, 
+               ' para ', NEW.cant_personas, ' personas, '),
+        NOW(),
+        'reserva'
+    );
 END
 $$
 DELIMITER ;
@@ -445,105 +529,96 @@ CREATE TABLE `vista_alertas` (
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `vista_detalle_pedidos`
--- (Véase abajo para la vista actual)
+-- Estructura de tabla para la tabla `vista_detalle_pedidos`
 --
+
 CREATE TABLE `vista_detalle_pedidos` (
-`id_detalle` int(11)
-,`id_pedido` int(11)
-,`fecha` date
-,`hora` time
-,`producto` varchar(60)
-,`cantidad` bigint(20)
-,`precio_unitario` bigint(20)
-,`subtotal` bigint(39)
-);
+  `id_detalle` int(11) DEFAULT NULL,
+  `id_pedido` int(11) DEFAULT NULL,
+  `fecha` date DEFAULT NULL,
+  `hora` time DEFAULT NULL,
+  `producto` varchar(60) DEFAULT NULL,
+  `cantidad` bigint(20) DEFAULT NULL,
+  `precio_unitario` bigint(20) DEFAULT NULL,
+  `subtotal` bigint(39) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `vista_historial_pedidos`
--- (Véase abajo para la vista actual)
+-- Estructura de tabla para la tabla `vista_historial_pedidos`
 --
+
 CREATE TABLE `vista_historial_pedidos` (
-`id_historial` int(11)
-,`id_pedido` int(11)
-,`fecha` date
-,`hora` time
-,`nombre_usuario` varchar(100)
-,`apellido_usuario` varchar(100)
-,`estado` enum('pendiente','en preparacion','entregado','cancelado')
-,`fecha_estado` date
-);
+  `id_historial` int(11) DEFAULT NULL,
+  `id_pedido` int(11) DEFAULT NULL,
+  `fecha` date DEFAULT NULL,
+  `hora` time DEFAULT NULL,
+  `nombre_usuario` varchar(100) DEFAULT NULL,
+  `apellido_usuario` varchar(100) DEFAULT NULL,
+  `estado` enum('pendiente','en preparacion','entregado','cancelado') DEFAULT NULL,
+  `fecha_estado` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `vista_historial_usuarios`
--- (Véase abajo para la vista actual)
+-- Estructura de tabla para la tabla `vista_pedidos_usuarios`
 --
-CREATE TABLE `vista_historial_usuarios` (
-);
 
--- --------------------------------------------------------
-
---
--- Estructura Stand-in para la vista `vista_pedidos_usuarios`
--- (Véase abajo para la vista actual)
---
 CREATE TABLE `vista_pedidos_usuarios` (
-`id_pedido` int(11)
-,`nombre` varchar(100)
-,`apellido` varchar(100)
-,`fecha` date
-,`hora` time
-,`total` bigint(20)
-,`estado` enum('entregado','cancelado','pendiente','en preparacion')
-);
+  `id_pedido` int(11) DEFAULT NULL,
+  `nombre` varchar(100) DEFAULT NULL,
+  `apellido` varchar(100) DEFAULT NULL,
+  `fecha` date DEFAULT NULL,
+  `hora` time DEFAULT NULL,
+  `total` bigint(20) DEFAULT NULL,
+  `estado` enum('entregado','cancelado','pendiente','en preparacion') DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `vista_productos_categorias`
--- (Véase abajo para la vista actual)
+-- Estructura de tabla para la tabla `vista_productos_categorias`
 --
+
 CREATE TABLE `vista_productos_categorias` (
-`id_producto` int(11)
-,`nombre` varchar(60)
-,`precio` bigint(20)
-,`cantidad` bigint(20)
-,`nombre_categoria` varchar(150)
-);
+  `id_producto` int(11) DEFAULT NULL,
+  `nombre` varchar(60) DEFAULT NULL,
+  `precio` bigint(20) DEFAULT NULL,
+  `cantidad` bigint(20) DEFAULT NULL,
+  `nombre_categoria` varchar(150) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `vista_reservas_mesas`
--- (Véase abajo para la vista actual)
+-- Estructura de tabla para la tabla `vista_reservas_mesas`
 --
+
 CREATE TABLE `vista_reservas_mesas` (
-`id_reserva` int(11)
-,`fecha` date
-,`hora` time
-,`cant_personas` int(11)
-,`estado` enum('disponible','no disponible')
-,`id_mesa` int(11)
-,`capacidad` int(11)
-);
+  `id_reserva` int(11) DEFAULT NULL,
+  `fecha` date DEFAULT NULL,
+  `hora` time DEFAULT NULL,
+  `cant_personas` int(11) DEFAULT NULL,
+  `estado` enum('disponible','no disponible') DEFAULT NULL,
+  `id_mesa` int(11) DEFAULT NULL,
+  `capacidad` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estructura Stand-in para la vista `vista_stock_bajo`
--- (Véase abajo para la vista actual)
+-- Estructura de tabla para la tabla `vista_stock_bajo`
 --
+
 CREATE TABLE `vista_stock_bajo` (
-`id_producto` int(11)
-,`nombre` varchar(60)
-,`cantidad` bigint(20)
-,`precio` bigint(20)
-,`estado_stock` varchar(16)
-);
+  `id_producto` int(11) DEFAULT NULL,
+  `nombre` varchar(60) DEFAULT NULL,
+  `cantidad` bigint(20) DEFAULT NULL,
+  `precio` bigint(20) DEFAULT NULL,
+  `estado_stock` varchar(16) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -554,78 +629,9 @@ DROP TABLE IF EXISTS `vista_alertas`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_alertas`  AS SELECT `alertas`.`id_alerta` AS `id_alerta`, `alertas`.`mensaje` AS `mensaje`, `alertas`.`fecha` AS `fecha`, `alertas`.`tipo` AS `tipo` FROM `alertas` ORDER BY `alertas`.`fecha` DESC ;
 
--- --------------------------------------------------------
-
---
--- Estructura para la vista `vista_detalle_pedidos`
---
-DROP TABLE IF EXISTS `vista_detalle_pedidos`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_detalle_pedidos`  AS SELECT `dp`.`id_detalle` AS `id_detalle`, `dp`.`cod_pedido` AS `id_pedido`, `p`.`fecha` AS `fecha`, `p`.`hora` AS `hora`, `pr`.`nombre` AS `producto`, `dp`.`cantidad` AS `cantidad`, `dp`.`precio_unitario` AS `precio_unitario`, `dp`.`cantidad`* `dp`.`precio_unitario` AS `subtotal` FROM ((`detalle_pedido` `dp` join `pedidos` `p` on(`dp`.`cod_pedido` = `p`.`id_pedido`)) join `productos` `pr` on(`dp`.`cod_producto` = `pr`.`id_producto`)) ;
-
--- --------------------------------------------------------
-
---
--- Estructura para la vista `vista_historial_pedidos`
---
-DROP TABLE IF EXISTS `vista_historial_pedidos`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_historial_pedidos`  AS SELECT `h`.`id_historial` AS `id_historial`, `h`.`id_pedido` AS `id_pedido`, `p`.`fecha` AS `fecha`, `p`.`hora` AS `hora`, `u`.`nombre` AS `nombre_usuario`, `u`.`apellido` AS `apellido_usuario`, `h`.`estado` AS `estado`, `h`.`fecha` AS `fecha_estado` FROM ((`historial_pedidos` `h` join `pedidos` `p` on(`h`.`id_pedido` = `p`.`id_pedido`)) join `usuarios` `u` on(`p`.`cod_usuario` = `u`.`id_usuario`)) WHERE `h`.`estado` in ('entregado','cancelado') ;
-
--- --------------------------------------------------------
-
---
--- Estructura para la vista `vista_historial_usuarios`
---
-DROP TABLE IF EXISTS `vista_historial_usuarios`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_historial_usuarios`  AS SELECT `u`.`id_usuario` AS `id_usuario`, concat(`u`.`nombre`,' ',`u`.`apellido`) AS `nombre_completo`, `p`.`id_pedido` AS `id_pedido`, `p`.`tipo_entrega` AS `tipo_entrega`, `h`.`estado` AS `estado`, `h`.`fecha` AS `fecha`, `h`.`hora` AS `hora`, `p`.`total` AS `total` FROM ((`historial_pedidos` `h` join `usuarios` `u` on(`h`.`cod_usuario` = `u`.`id_usuario`)) join `pedidos` `p` on(`h`.`id_pedido` = `p`.`id_pedido`)) ;
-
--- --------------------------------------------------------
-
---
--- Estructura para la vista `vista_pedidos_usuarios`
---
-DROP TABLE IF EXISTS `vista_pedidos_usuarios`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_pedidos_usuarios`  AS SELECT `p`.`id_pedido` AS `id_pedido`, `u`.`nombre` AS `nombre`, `u`.`apellido` AS `apellido`, `p`.`fecha` AS `fecha`, `p`.`hora` AS `hora`, `p`.`total` AS `total`, `p`.`estado` AS `estado` FROM (`pedidos` `p` join `usuarios` `u` on(`p`.`cod_usuario` = `u`.`id_usuario`)) ;
-
--- --------------------------------------------------------
-
---
--- Estructura para la vista `vista_productos_categorias`
---
-DROP TABLE IF EXISTS `vista_productos_categorias`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_productos_categorias`  AS SELECT `p`.`id_producto` AS `id_producto`, `p`.`nombre` AS `nombre`, `p`.`precio` AS `precio`, `p`.`cantidad` AS `cantidad`, `c`.`nombre_categoria` AS `nombre_categoria` FROM (`productos` `p` join `categorias` `c` on(`p`.`cod_categoria` = `c`.`id_categoria`)) ;
-
--- --------------------------------------------------------
-
---
--- Estructura para la vista `vista_reservas_mesas`
---
-DROP TABLE IF EXISTS `vista_reservas_mesas`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_reservas_mesas`  AS SELECT `r`.`id_reserva` AS `id_reserva`, `r`.`fecha` AS `fecha`, `r`.`hora` AS `hora`, `r`.`cant_personas` AS `cant_personas`, `r`.`estado` AS `estado`, `m`.`id_mesa` AS `id_mesa`, `m`.`capacidad` AS `capacidad` FROM (`reservas` `r` join `mesas` `m` on(`r`.`cod_mesa` = `m`.`id_mesa`)) ;
-
--- --------------------------------------------------------
-
---
--- Estructura para la vista `vista_stock_bajo`
---
-DROP TABLE IF EXISTS `vista_stock_bajo`;
-
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_stock_bajo`  AS SELECT `productos`.`id_producto` AS `id_producto`, `productos`.`nombre` AS `nombre`, `productos`.`cantidad` AS `cantidad`, `productos`.`precio` AS `precio`, CASE WHEN `productos`.`cantidad` = 0 THEN 'Sin stock' WHEN `productos`.`cantidad` < 5 THEN 'Stock bajo' ELSE 'Stock suficiente' END AS `estado_stock` FROM `productos` WHERE `productos`.`cantidad` < 5 ;
-
 --
 -- Índices para tablas volcadas
 --
-
---
--- Indices de la tabla `alertas`
---
-ALTER TABLE `alertas`
-  ADD PRIMARY KEY (`id_alerta`);
 
 --
 -- Indices de la tabla `categorias`
@@ -634,33 +640,12 @@ ALTER TABLE `categorias`
   ADD PRIMARY KEY (`id_categoria`);
 
 --
--- Indices de la tabla `detalle_pedido`
+-- Indices de la tabla `detalle_pedido_restaurante`
 --
-ALTER TABLE `detalle_pedido`
-  ADD PRIMARY KEY (`id_detalle`),
-  ADD KEY `cod_pedido` (`cod_pedido`),
-  ADD KEY `cod_producto` (`cod_producto`);
-
---
--- Indices de la tabla `domicilios`
---
-ALTER TABLE `domicilios`
-  ADD PRIMARY KEY (`id_domicilio`),
-  ADD UNIQUE KEY `cod_pedido` (`cod_pedido`),
-  ADD KEY `cod_usuario` (`cod_usuario`);
-
---
--- Indices de la tabla `historial_pedidos`
---
-ALTER TABLE `historial_pedidos`
-  ADD PRIMARY KEY (`id_historial`),
-  ADD KEY `id_pedido` (`id_pedido`);
-
---
--- Indices de la tabla `insumos`
---
-ALTER TABLE `insumos`
-  ADD PRIMARY KEY (`id_insumo`);
+ALTER TABLE `detalle_pedido_restaurante`
+  ADD PRIMARY KEY (`id_detalle_pedido_restaurante`),
+  ADD KEY `id_pago_restaurante` (`id_pago_restaurante`),
+  ADD KEY `id_producto_em` (`id_producto_em`);
 
 --
 -- Indices de la tabla `mesas`
@@ -669,63 +654,35 @@ ALTER TABLE `mesas`
   ADD PRIMARY KEY (`id_mesa`);
 
 --
--- Indices de la tabla `pedidos`
+-- Indices de la tabla `pagos_restaurante`
 --
-ALTER TABLE `pedidos`
-  ADD PRIMARY KEY (`id_pedido`),
-  ADD KEY `cod_usuario` (`cod_usuario`);
+ALTER TABLE `pagos_restaurante`
+  ADD PRIMARY KEY (`id_pago_restaurante`),
+  ADD KEY `id_mesa` (`id_mesa`);
 
 --
--- Indices de la tabla `pedido_mesa`
+-- Indices de la tabla `productos_empleados`
 --
-ALTER TABLE `pedido_mesa`
-  ADD PRIMARY KEY (`cod_pedido`,`cod_mesa`),
-  ADD KEY `cod_mesa` (`cod_mesa`);
-
---
--- Indices de la tabla `productos`
---
-ALTER TABLE `productos`
-  ADD PRIMARY KEY (`id_producto`),
-  ADD KEY `cod_categoria` (`cod_categoria`);
+ALTER TABLE `productos_empleados`
+  ADD PRIMARY KEY (`id_producto_em`),
+  ADD KEY `fk_categoria` (`id_categoria`);
 
 --
 -- Indices de la tabla `reservas`
 --
 ALTER TABLE `reservas`
   ADD PRIMARY KEY (`id_reserva`),
-  ADD KEY `cod_mesa` (`cod_mesa`),
-  ADD KEY `fk_reserva_usuario` (`id_usuario`);
-
---
--- Indices de la tabla `salida`
---
-ALTER TABLE `salida`
-  ADD PRIMARY KEY (`id_salida`),
-  ADD KEY `cod_producto` (`cod_producto`);
-
---
--- Indices de la tabla `subcategorias_insumos`
---
-ALTER TABLE `subcategorias_insumos`
-  ADD PRIMARY KEY (`id_subcategoria`);
+  ADD KEY `fk_reservas_usuarios` (`id_usuario`);
 
 --
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  ADD PRIMARY KEY (`id_usuario`),
-  ADD UNIQUE KEY `correo` (`correo`);
+  ADD PRIMARY KEY (`id_usuario`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
 --
-
---
--- AUTO_INCREMENT de la tabla `alertas`
---
-ALTER TABLE `alertas`
-  MODIFY `id_alerta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT de la tabla `categorias`
@@ -734,28 +691,10 @@ ALTER TABLE `categorias`
   MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT de la tabla `detalle_pedido`
+-- AUTO_INCREMENT de la tabla `detalle_pedido_restaurante`
 --
-ALTER TABLE `detalle_pedido`
-  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- AUTO_INCREMENT de la tabla `domicilios`
---
-ALTER TABLE `domicilios`
-  MODIFY `id_domicilio` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `historial_pedidos`
---
-ALTER TABLE `historial_pedidos`
-  MODIFY `id_historial` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT de la tabla `insumos`
---
-ALTER TABLE `insumos`
-  MODIFY `id_insumo` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `detalle_pedido_restaurante`
+  MODIFY `id_detalle_pedido_restaurante` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `mesas`
@@ -764,96 +703,57 @@ ALTER TABLE `mesas`
   MODIFY `id_mesa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT de la tabla `pedidos`
+-- AUTO_INCREMENT de la tabla `pagos_restaurante`
 --
-ALTER TABLE `pedidos`
-  MODIFY `id_pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+ALTER TABLE `pagos_restaurante`
+  MODIFY `id_pago_restaurante` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `productos`
+-- AUTO_INCREMENT de la tabla `productos_empleados`
 --
-ALTER TABLE `productos`
-  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE `productos_empleados`
+  MODIFY `id_producto_em` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `reservas`
 --
 ALTER TABLE `reservas`
-  MODIFY `id_reserva` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
--- AUTO_INCREMENT de la tabla `salida`
---
-ALTER TABLE `salida`
-  MODIFY `id_salida` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `subcategorias_insumos`
---
-ALTER TABLE `subcategorias_insumos`
-  MODIFY `id_subcategoria` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_reserva` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- Restricciones para tablas volcadas
 --
 
 --
--- Filtros para la tabla `detalle_pedido`
+-- Filtros para la tabla `detalle_pedido_restaurante`
 --
-ALTER TABLE `detalle_pedido`
-  ADD CONSTRAINT `detalle_pedido_ibfk_1` FOREIGN KEY (`cod_pedido`) REFERENCES `pedidos` (`id_pedido`),
-  ADD CONSTRAINT `detalle_pedido_ibfk_2` FOREIGN KEY (`cod_producto`) REFERENCES `productos` (`id_producto`);
+ALTER TABLE `detalle_pedido_restaurante`
+  ADD CONSTRAINT `detalle_pedido_restaurante_ibfk_1` FOREIGN KEY (`id_pago_restaurante`) REFERENCES `pagos_restaurante` (`id_pago_restaurante`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `detalle_pedido_restaurante_ibfk_2` FOREIGN KEY (`id_producto_em`) REFERENCES `productos_empleados` (`id_producto_em`) ON UPDATE CASCADE;
 
 --
--- Filtros para la tabla `domicilios`
+-- Filtros para la tabla `pagos_restaurante`
 --
-ALTER TABLE `domicilios`
-  ADD CONSTRAINT `domicilios_ibfk_1` FOREIGN KEY (`cod_pedido`) REFERENCES `pedidos` (`id_pedido`),
-  ADD CONSTRAINT `domicilios_ibfk_2` FOREIGN KEY (`cod_usuario`) REFERENCES `usuarios` (`id_usuario`);
+ALTER TABLE `pagos_restaurante`
+  ADD CONSTRAINT `pagos_restaurante_ibfk_1` FOREIGN KEY (`id_mesa`) REFERENCES `mesas` (`id_mesa`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Filtros para la tabla `historial_pedidos`
+-- Filtros para la tabla `productos_empleados`
 --
-ALTER TABLE `historial_pedidos`
-  ADD CONSTRAINT `historial_pedidos_ibfk_1` FOREIGN KEY (`id_pedido`) REFERENCES `pedidos` (`id_pedido`);
-
---
--- Filtros para la tabla `pedidos`
---
-ALTER TABLE `pedidos`
-  ADD CONSTRAINT `pedidos_ibfk_1` FOREIGN KEY (`cod_usuario`) REFERENCES `usuarios` (`id_usuario`);
-
---
--- Filtros para la tabla `pedido_mesa`
---
-ALTER TABLE `pedido_mesa`
-  ADD CONSTRAINT `pedido_mesa_ibfk_1` FOREIGN KEY (`cod_pedido`) REFERENCES `pedidos` (`id_pedido`),
-  ADD CONSTRAINT `pedido_mesa_ibfk_2` FOREIGN KEY (`cod_mesa`) REFERENCES `mesas` (`id_mesa`);
-
---
--- Filtros para la tabla `productos`
---
-ALTER TABLE `productos`
-  ADD CONSTRAINT `productos_ibfk_1` FOREIGN KEY (`cod_categoria`) REFERENCES `categorias` (`id_categoria`);
+ALTER TABLE `productos_empleados`
+  ADD CONSTRAINT `fk_categoria` FOREIGN KEY (`id_categoria`) REFERENCES `categorias` (`id_categoria`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `reservas`
 --
 ALTER TABLE `reservas`
-  ADD CONSTRAINT `fk_reserva_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`),
-  ADD CONSTRAINT `reservas_ibfk_1` FOREIGN KEY (`cod_mesa`) REFERENCES `mesas` (`id_mesa`);
-
---
--- Filtros para la tabla `salida`
---
-ALTER TABLE `salida`
-  ADD CONSTRAINT `salida_ibfk_1` FOREIGN KEY (`cod_producto`) REFERENCES `productos` (`id_producto`);
+  ADD CONSTRAINT `fk_reservas_usuarios` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
