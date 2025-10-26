@@ -232,42 +232,21 @@ def cliente_reservar():
         fecha = request.form["fecha"]
         hora = request.form["hora"]
         cant_personas = request.form["cant_personas"]
-        id_mesa = request.form["id_mesa"]
         telefono = request.form["telefono"]
 
-        # Guardar en MySQL
+        # Guardar en MySQL (sin id_mesa)
         cur.execute("""
-            INSERT INTO reservas (fecha, hora, cant_personas,
-            id_mesa, telefono)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (fecha, hora, cant_personas, id_mesa, telefono))
+            INSERT INTO reservas (fecha, hora, cant_personas, telefono)
+            VALUES (%s, %s, %s, %s)
+        """, (fecha, hora, cant_personas, telefono))
         mysql.connection.commit()
 
         flash("✅ Reserva creada con éxito", "success")
-        return redirect(url_for("ver_reservas"))  # Te redirige a ver las
-    # creservas
+        return redirect(url_for("ver_reservas"))
 
-    # Si es GET: cargar mesas disponibles para el select
-    cur.execute("SELECT id_mesa, numero, capacidad FROM mesas")
-    mesas = cur.fetchall()
+    # Si es GET: ya no necesitas cargar mesas
+    return render_template("cliente_reservar.html")
 
-    return render_template("cliente_reservar.html", mesas=mesas)
-
-# Mesas: listar mesas ordenadas por número
-
-
-@app.route("/mesas")
-def ver_mesas():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM mesas ORDER BY numero ASC")
-    mesas = cur.fetchall()
-    return render_template("mesas.html", mesas=mesas)
-
-# Alias para templates que esperan otro endpoint
-
-
-app.add_url_rule('/mesas/ver', endpoint='mesas.mesas',
-                 view_func=ver_mesas, methods=['GET'])
 
 # ------------------ FUNCIONES AUX: CATEGORIAS ------------------
 # Función auxiliar para obtener sólo ciertas categorías importantes
@@ -937,32 +916,30 @@ def cliente_reservar_form():
         cant_personas = int(request.form["cant_personas"])
         tipo_evento = request.form["tipo_evento"]
         comentarios = request.form["comentarios"]
-        id_mesa = int(request.form["id_mesa"])
         telefono = request.form["telefono"]
 
-        #  Validar que la fecha no sea pasada
+        # Validar fecha y hora
         fecha_reserva = datetime.strptime(fecha, "%Y-%m-%d").date()
         hoy = datetime.now().date()
 
         if fecha_reserva < hoy:
-            flash("❌ No puedes reservar en una fecha que ya pasó.", "error")
+            flash("❌ No puedes reservar en una fecha pasada.", "error")
             return redirect(url_for("cliente_reservar_form"))
 
-        #  Validar que si la fecha es hoy, la hora no haya pasado
         if fecha_reserva == hoy:
             hora_actual = datetime.now().time()
             hora_reserva = datetime.strptime(hora, "%H:%M").time()
             if hora_reserva < hora_actual:
-                flash("❌ No puedes reservar en una hora que ya pasó.", "error")
+                flash("❌ No puedes reservar en una hora pasada.", "error")
                 return redirect(url_for("cliente_reservar_form"))
 
-        # ✅ Si pasa la validación, guardar la reserva en la base de datos
+        #  Guardar la reserva en la base de datos
         cur = mysql.connection.cursor()
         cur.execute("""
             INSERT INTO reservas (nombre, documento, fecha, hora,
-            cant_personas, tipo_evento, comentarios, estado, cod_mesa,
-            telefono, id_usuario)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, 'pendiente', %s, %s, %s)
+            cant_personas, tipo_evento, comentarios, estado, telefono,
+            id_usuario)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 'pendiente', %s, %s)
         """, (
             nombre,
             documento,
@@ -971,25 +948,16 @@ def cliente_reservar_form():
             cant_personas,
             tipo_evento,
             comentarios,
-            id_mesa,
             telefono,
             1
         ))
 
-        print("🔎 CONSULTA EJECUTADA:")
-
         mysql.connection.commit()
-
-        flash("✅ Reserva registrada correctamente. Espera confirmación.",
+        flash(" Reserva registrada correctamente. Espera confirmación.",
               "success")
         return redirect(url_for("cliente_dashboard"))
 
-    # Si el método es GET → mostrar mesas disponibles
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM mesas WHERE estado='Disponible'")
-    mesas = cur.fetchall()
-
-    return render_template("cliente_reservar.html", mesas=mesas)
+    return render_template("cliente_reservar.html")
 
 
 @app.route('/cancelar/<int:id>', methods=['POST'])
@@ -998,7 +966,7 @@ def cancelar_reserva(id):
     cur.execute("DELETE FROM reservas WHERE id_reserva = %s", (id,))
     mysql.connection.commit()
     cur.close()
-    flash("Reserva cancelada exitosamente ✅", "success")
+    flash("Reserva cancelada exitosamente", "success")
     return redirect(url_for('ver_reservas'))
 
 
@@ -1007,12 +975,10 @@ def ver_reservas():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM reservas")
     reservas = cur.fetchall()
-
     return render_template("cliente_ver_reservas.html", reservas=reservas)
 
 
 # Mostrar productos disponibles al cliente
-
 
 @app.route("/cliente/productos")
 def cliente_productos():
@@ -1027,9 +993,8 @@ def cliente_productos():
     productos = cur.fetchall()
     return render_template("cliente_productos.html", productos=productos)
 
+
 # Agregar producto al carrito guardado en sesión
-
-
 @app.route("/carrito/agregar/<int:id_producto>", methods=["POST"])
 def agregar_carrito(id_producto):
     cantidad = int(request.form.get("cantidad", 1))
@@ -1059,26 +1024,34 @@ def agregar_carrito(id_producto):
     flash("Producto agregado al carrito", "success")
     return redirect(url_for("cliente_productos"))
 
-# Mostrar carrito (incluye total y mesas disponibles
-# para seleccionar si aplica)
-
 
 @app.route("/carrito", endpoint="cliente_carrito")
 def ver_carrito():
     carrito = session.get("carrito", [])
     total = sum(item["precio"] * item["cantidad"] for item in carrito)
 
-    # ✅ Traer mesas disponibles de la base de datos
     cur = mysql.connection.cursor()
+
     cur.execute("SELECT * FROM mesas WHERE estado='Disponible'")
     mesas = cur.fetchall()
 
-    return render_template("cliente_carrito.html", carrito=carrito,
-                           total=total, mesas=mesas)
+    cur.execute("""
+        SELECT id_producto, nombre, precio, imagen
+        FROM productos
+        WHERE cod_categoria = (
+            SELECT id_categoria FROM categorias WHERE nombre_categoria = 'Acompañamientos' LIMIT 1
+        )
+    """)
+    acompanamientos = cur.fetchall()
 
-# Confirmar pedido: crea pedido, detalle y limpia carrito de la sesión
+    return render_template("cliente_carrito.html",
+                           carrito=carrito,
+                           total=total,
+                           mesas=mesas,
+                           acompanamientos=acompanamientos)
 
 
+# Confirmar pedido
 @app.route("/pedido/confirmar", methods=["POST"])
 def hacer_pedido():
     carrito = session.get("carrito", [])
@@ -1088,16 +1061,25 @@ def hacer_pedido():
 
     total = sum(item["precio"] * item["cantidad"] for item in carrito)
 
-    tipo_entrega = request.form.get("tipo_entrega", "mesa")
+    # Sumar acompañamientos seleccionados 
+    acompanamientos_ids = request.form.getlist("acompanamientos")
+    if acompanamientos_ids:
+        cur = mysql.connection.cursor()
+        formato = ','.join(['%s'] * len(acompanamientos_ids))
+        cur.execute(f"SELECT SUM(precio) as total_acomp FROM productos WHERE id_producto IN ({formato})", acompanamientos_ids)
+        total_acomp = cur.fetchone()["total_acomp"] or 0
+        total += total_acomp
+
+    tipo_entrega = request.form.get("tipo_entrega", "restaurante")
     metodo_pago = request.form.get("metodo_pago", "efectivo")
-    cod_mesa = request.form.get("cod_mesa") if tipo_entrega == "mesa" else None
+    cod_mesa = request.form.get("cod_mesa") if tipo_entrega == "restaurante" else None
     direccion = None
     telefono = None
     if tipo_entrega == "domicilio":
         direccion = request.form.get("direccion")
         telefono = request.form.get("telefono_envio")
 
-    id_usuario = session.get("id_usuario", 1)  # Para pruebas con ID fijo
+    id_usuario = session.get("id_usuario", 1)  # temporal
 
     cur = mysql.connection.cursor()
     cur.execute("""
@@ -1124,6 +1106,15 @@ def hacer_pedido():
             item["cantidad"], item["precio"]
         ))
 
+    if acompanamientos_ids:
+        for id_acomp in acompanamientos_ids:
+            cur.execute("""
+                INSERT INTO detalle_pedido (cod_pedido, cod_producto,
+                cantidad, precio_unitario)
+                SELECT %s, id_producto, 1, precio
+                FROM productos WHERE id_producto = %s
+            """, (id_pedido, id_acomp))
+
     mysql.connection.commit()
     session.pop("carrito", None)
 
@@ -1143,17 +1134,17 @@ def ver_pedidos():
     return render_template("mis_pedidos.html", pedidos=pedidos)
 
 
-# ✅ ELIMINAR PRODUCTO DEL CARRITO
-
-
+# Eliminar producto del carrito
 @app.route("/carrito/eliminar/<int:id_producto>")
 def eliminar_carrito(id_producto):
     carrito = session.get("carrito", [])
     nuevo_carrito = [
-        item for item in carrito if item["id_producto"] != id_producto]
+        item for item in carrito if item["id_producto"] != id_producto
+    ]
     session["carrito"] = nuevo_carrito
     flash("Producto eliminado del carrito", "success")
     return redirect(url_for("cliente_carrito"))
+
 
 # ------------------ LOGOUT ------------------
 # Limpia la sesión completamente

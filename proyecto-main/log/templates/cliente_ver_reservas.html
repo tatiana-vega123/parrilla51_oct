@@ -67,7 +67,6 @@
         <p><strong>Fecha:</strong> {{ r.fecha }}</p>
         <p><strong>Hora:</strong> {{ r.hora }}</p>
         <p><strong>Personas:</strong> {{ r.cant_personas }}</p>
-        <p><strong>Mesa:</strong> {{ r.cod_mesa }}</p>
         <p><strong>Estado:</strong> {{ r.estado or "pendiente" }}</p>
 
         <!-- Botón cancelar con confirmación -->
@@ -88,6 +87,8 @@ function confirmarCancelacion() {
     return confirm("⚠️ ¿Estás seguro de que deseas cancelar esta reserva?");
 }
 </script>
+
+    
 
 </body>
 </html>

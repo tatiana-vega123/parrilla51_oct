@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-10-2025 a las 03:43:21
+-- Tiempo de generación: 26-10-2025 a las 17:27:27
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -91,7 +91,10 @@ INSERT INTO `alertas` (`id_alerta`, `mensaje`, `fecha`, `tipo`) VALUES
 (0, '? Se creó una reserva para el 2025-10-25 a las 12:30pm-2:30pm para 7 personas, ', '2025-10-24 00:17:10', 'reserva'),
 (0, '❌ Se canceló la reserva N° 17', '2025-10-24 00:18:18', 'reserva'),
 (0, '? Se creó una reserva para el 2025-10-31 a las 2:00pm-4:00pm para 11 personas, ', '2025-10-24 00:19:27', 'reserva'),
-(0, '? Se creó una reserva para el 2025-11-01 a las 1:00pm-3:00pm para 12 personas, ', '2025-10-24 00:54:58', 'reserva');
+(0, '? Se creó una reserva para el 2025-11-01 a las 1:00pm-3:00pm para 12 personas, ', '2025-10-24 00:54:58', 'reserva'),
+(0, '❌ Se eliminó el producto \"pan\" del inventario', '2025-10-25 22:23:24', 'producto'),
+(0, '? Se creó una reserva para el 2025-10-29 a las 12:00pm-2:00pm para 1 personas, ', '2025-10-26 02:17:59', 'reserva'),
+(0, '❌ Se canceló la reserva N° 24', '2025-10-26 02:26:12', 'reserva');
 
 -- --------------------------------------------------------
 
@@ -109,10 +112,16 @@ CREATE TABLE `categorias` (
 --
 
 INSERT INTO `categorias` (`id_categoria`, `nombre_categoria`) VALUES
-(1, 'Carnes'),
-(2, 'Bebidas'),
-(3, 'Entradas'),
-(4, 'Postres');
+(1, 'Res'),
+(2, 'Pollo'),
+(3, 'Cerdo'),
+(4, 'Entradas'),
+(5, 'Plato del día'),
+(6, 'Acompañamientos'),
+(7, 'Platos Combinados'),
+(8, 'Cortes gruesos'),
+(9, 'Bebidas'),
+(10, 'Adicionales');
 
 -- --------------------------------------------------------
 
@@ -136,7 +145,22 @@ CREATE TABLE `detalle_pedido` (
 INSERT INTO `detalle_pedido` (`id_detalle`, `cod_pedido`, `cod_producto`, `cantidad`, `precio_unitario`, `iva`) VALUES
 (1, 1, 2, 1, 1000, NULL),
 (2, 2, 2, 1, 1000, NULL),
-(3, 3, 2, 1, 1000, NULL);
+(3, 3, 2, 1, 1000, NULL),
+(0, 0, 16, 3, 28000, NULL),
+(0, 0, 34, 1, 4000, NULL),
+(0, 0, 35, 1, 3500, NULL),
+(0, 0, 16, 1, 28000, NULL),
+(0, 0, 35, 1, 3500, NULL),
+(0, 0, 37, 1, 4000, NULL),
+(0, 0, 11, 1, 24000, NULL),
+(0, 0, 36, 1, 3500, NULL),
+(0, 0, 37, 1, 4000, NULL),
+(0, 0, 10, 1, 19000, NULL),
+(0, 0, 36, 1, 3500, NULL),
+(0, 0, 37, 1, 4000, NULL),
+(0, 11, 16, 1, 28000, NULL),
+(0, 11, 35, 1, 3500, NULL),
+(0, 11, 36, 1, 3500, NULL);
 
 -- --------------------------------------------------------
 
@@ -257,17 +281,23 @@ CREATE TABLE `pedidos` (
   `telefono` bigint(20) DEFAULT NULL,
   `total` bigint(20) DEFAULT NULL,
   `estado` enum('entregado','cancelado','pendiente','en preparacion') DEFAULT 'pendiente',
-  `cod_usuario` int(11) DEFAULT NULL
+  `cod_usuario` int(11) DEFAULT NULL,
+  `direccion` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `pedidos`
 --
 
-INSERT INTO `pedidos` (`id_pedido`, `tipo_entrega`, `cod_mesa`, `fecha`, `hora`, `metodo_pago`, `telefono`, `total`, `estado`, `cod_usuario`) VALUES
-(1, 'restaurante', 1, '2025-09-15', '22:17:23', NULL, NULL, 1000, 'pendiente', 16),
-(2, 'domicilio', NULL, '2025-09-15', '22:53:18', NULL, NULL, 1000, 'pendiente', 16),
-(3, 'domicilio', NULL, '2025-09-15', '22:56:40', 'tarjeta', NULL, 1000, 'pendiente', 16);
+INSERT INTO `pedidos` (`id_pedido`, `tipo_entrega`, `cod_mesa`, `fecha`, `hora`, `metodo_pago`, `telefono`, `total`, `estado`, `cod_usuario`, `direccion`) VALUES
+(1, 'restaurante', 1, '2025-09-15', '22:17:23', NULL, NULL, 1000, 'pendiente', 16, NULL),
+(2, 'domicilio', NULL, '2025-09-15', '22:53:18', NULL, NULL, 1000, 'pendiente', 16, NULL),
+(3, 'domicilio', NULL, '2025-09-15', '22:56:40', 'tarjeta', NULL, 1000, 'pendiente', 16, NULL),
+(4, '', NULL, '2025-10-26', '01:46:58', 'efectivo', NULL, 91500, 'pendiente', 1, NULL),
+(5, '', NULL, '2025-10-26', '01:47:53', 'efectivo', NULL, 35500, 'pendiente', 1, NULL),
+(6, '', NULL, '2025-10-26', '01:51:49', 'efectivo', NULL, 31500, 'pendiente', 1, NULL),
+(7, 'restaurante', NULL, '2025-10-26', '01:55:32', 'efectivo', NULL, 26500, 'pendiente', 1, NULL),
+(11, 'domicilio', NULL, '2025-10-26', '01:58:20', 'efectivo', 3271738299, 35000, 'pendiente', 1, 'calle 20 # 4-11');
 
 --
 -- Disparadores `pedidos`
@@ -322,8 +352,6 @@ CREATE TABLE `productos` (
   `cantidad` bigint(20) DEFAULT NULL,
   `descripcion` varchar(150) DEFAULT NULL,
   `precio` bigint(20) DEFAULT NULL,
-  `fecha_vencimiento` date DEFAULT NULL,
-  `fecha_lote` date DEFAULT NULL,
   `cod_categoria` int(11) DEFAULT NULL,
   `imagen` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -332,8 +360,45 @@ CREATE TABLE `productos` (
 -- Volcado de datos para la tabla `productos`
 --
 
-INSERT INTO `productos` (`id_producto`, `nombre`, `cantidad`, `descripcion`, `precio`, `fecha_vencimiento`, `fecha_lote`, `cod_categoria`, `imagen`) VALUES
-(2, 'pan', 10, '10', 1000, NULL, NULL, 3, 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxISEhUSERIQFhUVFRcQEBYVFhUPEBAQFhUWFhUXFhUYHSggGRolHRUWITEhJykrLi4uFx8zODUsNygtLisBCgoKDg0OGRAQGi0lHyUtLS0tKy0tKystLS0tLS4tLS0tLS0wLS0tLS0tLS0tLS0tLS0tLS0tLS0tKy0tLS0tLf/AABEIAMIBAwMBIgACEQEDEQH/');
+INSERT INTO `productos` (`id_producto`, `nombre`, `cantidad`, `descripcion`, `precio`, `cod_categoria`, `imagen`) VALUES
+(1, 'Churrasco grande (390g)', 10, 'Un rico churrasco grande', 39000, 1, 'churrasco_grandesito.jpg'),
+(2, 'Churrasco pequeño (230g)', 10, 'Corte de res a la parrilla de 230 gramos', 25000, 1, 'churrasco_pequeno.png'),
+(3, 'Carne grande (320g)', 10, 'Porción de carne de res de 320 gramos', 24000, 1, 'carne_grande.jpg'),
+(4, 'Carne pequeña (200g)', 10, 'Porción de carne de res de 200 gramos', 19000, 1, 'carne_pequena.jpg'),
+(5, 'Baby beef (250g)', 10, 'Corte jugoso de baby beef de 250 gramos', 32000, 1, 'baby_beef.jpg'),
+(6, 'Sobrebarriga dorada a la parrilla o en salsa (270g)', 10, 'Sobrebarriga dorada con sazón especial', 26000, 1, 'sobrebarriga.jpg'),
+(7, 'Lengua a la parrilla', 10, 'Lengua a la parrilla con acompañamientos', 26000, 1, 'lengua_parrilla.jpg'),
+(8, 'Morrillo (290g)', 10, 'Corte blando y jugoso de res', 26000, 1, 'morillo.jpg'),
+(9, 'Hamburguesa con papas', 10, 'Hamburguesa de res con papas a la francesa', 16000, 1, 'hamburguesa.jpg'),
+(10, 'Churrasco de pollo (280g)', 10, 'Corte de pierna pernil deshuesado', 19000, 2, 'churrasco_pollo.jpg'),
+(11, 'Pechuga grande (320g)', 10, 'Pechuga de pollo a la parrilla de 320 gramos', 24000, 2, 'pechuga_grande.jpg'),
+(12, 'Pechuga pequeña (200g)', 10, 'Pechuga de pollo a la parrilla de 200 gramos', 19000, 2, 'pechuga_pequena.jpg'),
+(13, 'Pollo al horno', 10, 'Rico pollito', 16000, 2, 'pollo_horno.jpg'),
+(14, 'Lomo de cerdo grande (320g)', 10, 'Lomo de cerdo a la parrilla de 320 gramos', 26000, 3, 'lomo_cerdo_grande.jpg'),
+(15, 'Lomo de cerdo pequeño (200g)', 10, 'Lomo de cerdo a la parrilla de 200 gramos', 20000, 3, 'lomo_cerdo_pequeno.jpg'),
+(16, 'Costillitas de cerdo (350g) ', 10, '(solo jueves, viernes, sabados y domingos)', 28000, 3, 'costillitas_cerdo.jpg'),
+(17, 'Plato del día', 10, 'Varia según el dia: Lunes(Ajiaco con pollo), Martes(Mondongo), Miercoles(Variado), Jueves(Frijolada), Viernes(Sancocho mixto)', 20000, 5, 'plato_dia.png'),
+(18, 'Chorizo', 10, 'Porción de chorizo', 5000, 4, 'chorizo.jpg'),
+(19, 'Arepitas de la parrilla', 10, '(4 unidades)', 4000, 4, 'arepitas_parrilla.jpg'),
+(20, 'Plato mixto', 10, 'Dos tipos de carne entre: pechuga, churrasco y lomo de cerdo', 39000, 7, 'plato_mixto.jpg'),
+(21, 'Parrillada ', 10, '(res, cerdo, pechuga y chorizo)', 39000, 7, 'parrillada.jpg'),
+(22, 'Medallones de lomo (300g)', 10, 'Corte grueso de lomo fino de 300 gramos', 34000, 8, 'medallones_lomo.jpg'),
+(23, 'Biffe chorizo (350g)', 10, 'Corte jugoso de 350 gramos', 34000, 8, 'biffe_chorizo.jpg'),
+(24, 'Entrecot', 10, 'Corte a la parrilla', 34000, 8, 'entrecot.jpg'),
+(25, 'Gaseosa (350ml)', 10, 'Bebida gaseosa personal de 350ml', 3000, 9, 'Gaseosa350.jpg'),
+(26, 'Gaseosa (250ml)', 10, 'Bebida gaseosa', 2500, 9, 'gaseosa250.jpg'),
+(27, 'Cola & Pola', 10, 'Bebida tradicional mezcla de cerveza y gaseosa', 4000, 9, 'colaypola.jpg'),
+(28, 'Cerveza Águila o Poker', 10, 'Cerveza refrescante', 4500, 9, 'cerveza.jpg'),
+(29, 'Cerveza Club Colombia', 10, 'Cerveza deliciosa', 6000, 9, 'cervezaclub.png'),
+(30, 'Agua en botella (600ml)', 10, 'Botella de agua', 3500, 9, 'agua.jpg'),
+(31, 'Agua con gas (600ml)', 10, 'Botella de agua con gas', 3500, 9, 'aguagas.jpg'),
+(32, 'Jugo del día', 10, 'Jugo natural del día', 2500, 9, 'jugo.jpg'),
+(33, 'Aguacate macerado con sal', 10, 'Porción de aguacate fresco', 7000, 6, 'aguacate.jpg'),
+(34, 'Ensalada de la casa', 10, 'Ensalada muy rica', 4000, 6, 'ensalada.jpg'),
+(35, 'Arroz blanco', 10, 'Porción de arroz blanco', 3500, 6, 'arroz.jpg'),
+(36, 'Papa salada', 10, 'Porción de papa salada', 3500, 6, 'papa.jpg'),
+(37, 'Yuca al vapor', 10, 'Porción de yuca cocida al vapor', 4000, 6, 'yuca.jpg'),
+(38, 'Sopa', 10, 'Sopa ', 5000, 10, 'sopa.jpg');
 
 --
 -- Disparadores `productos`
@@ -378,13 +443,6 @@ CREATE TABLE `productos_empleados` (
   `id_categoria` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Volcado de datos para la tabla `productos_empleados`
---
-
-INSERT INTO `productos_empleados` (`id_producto_em`, `nombre`, `precio`, `descripcion`, `id_categoria`) VALUES
-(2, 'queso ', 11111.00, 'queooo', 1);
-
 -- --------------------------------------------------------
 
 --
@@ -400,7 +458,7 @@ CREATE TABLE `reservas` (
   `telefono` varchar(20) DEFAULT NULL,
   `id_usuario` int(11) DEFAULT NULL,
   `nombre` varchar(100) DEFAULT NULL,
-  `documento_identidad` varchar(50) DEFAULT NULL,
+  `documento` varchar(50) DEFAULT NULL,
   `tipo_evento` enum('','Almuerzo','Reunión','Celebración','Otro') DEFAULT NULL,
   `comentarios` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -409,7 +467,7 @@ CREATE TABLE `reservas` (
 -- Volcado de datos para la tabla `reservas`
 --
 
-INSERT INTO `reservas` (`id_reserva`, `fecha`, `hora`, `cant_personas`, `estado`, `telefono`, `id_usuario`, `nombre`, `documento_identidad`, `tipo_evento`, `comentarios`) VALUES
+INSERT INTO `reservas` (`id_reserva`, `fecha`, `hora`, `cant_personas`, `estado`, `telefono`, `id_usuario`, `nombre`, `documento`, `tipo_evento`, `comentarios`) VALUES
 (19, '2025-12-11', '2:00pm-4:00pm', '4', 'Pendiente', '3202995114', 16, 'aaa', '111', 'Almuerzo', 'hola'),
 (20, '2025-10-25', '12:30pm-2:30pm', '7', 'confirmada', '3202995114', 16, 'Tommy ', '1111111', 'Almuerzo', '# app.py unificado (comentado por bloques y funciones) from flask import (     Flask, render_template, request, redirect, url_for, session,     jsonify, flash, send_file ) from flask_mysqldb import MySQL from flask_mail import Mail   # falta message # fro'),
 (21, '2025-10-31', '2:00pm-4:00pm', '11', 'Pendiente', '3202995114', 16, 'Tommy ', '111', 'Almuerzo', 'hola'),
@@ -661,6 +719,18 @@ ALTER TABLE `pagos_restaurante`
   ADD KEY `id_mesa` (`id_mesa`);
 
 --
+-- Indices de la tabla `pedidos`
+--
+ALTER TABLE `pedidos`
+  ADD PRIMARY KEY (`id_pedido`);
+
+--
+-- Indices de la tabla `productos`
+--
+ALTER TABLE `productos`
+  ADD PRIMARY KEY (`id_producto`);
+
+--
 -- Indices de la tabla `productos_empleados`
 --
 ALTER TABLE `productos_empleados`
@@ -688,7 +758,7 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_pedido_restaurante`
@@ -709,6 +779,18 @@ ALTER TABLE `pagos_restaurante`
   MODIFY `id_pago_restaurante` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `pedidos`
+--
+ALTER TABLE `pedidos`
+  MODIFY `id_pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT de la tabla `productos`
+--
+ALTER TABLE `productos`
+  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+
+--
 -- AUTO_INCREMENT de la tabla `productos_empleados`
 --
 ALTER TABLE `productos_empleados`
@@ -718,7 +800,7 @@ ALTER TABLE `productos_empleados`
 -- AUTO_INCREMENT de la tabla `reservas`
 --
 ALTER TABLE `reservas`
-  MODIFY `id_reserva` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id_reserva` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
