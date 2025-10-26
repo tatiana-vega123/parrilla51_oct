@@ -1167,21 +1167,19 @@ def eliminar_carrito(id_producto):
 @app.route("/registrar_empleado")
 def registrar_empleado():
     cur = mysql.connection.cursor()
-
-    cur.execute("SELECT id_categoria, nombre_categoria FROM categorias")
+    cur.execute("SELECT id_categoria_em, nombre_categoria FROM categorias_empleados")
     categorias = cur.fetchall()
-
     cur.execute("""
         SELECT p.id_producto_em, p.nombre, p.precio, p.descripcion,
         c.nombre_categoria
         FROM productos_empleados p
-        JOIN categorias c ON p.id_categoria = c.id_categoria
+        JOIN categorias_empleados c ON p.id_categoria_em = c.id_categoria_em
     """)
     productos = cur.fetchall()
-
     cur.close()
     return render_template("registrar_empleado.html", productos=productos,
                            categorias=categorias)
+
 
 # ===================== AGREGAR CATEGORÍA =====================
 @app.route("/agregar_categoria", methods=["POST"])
@@ -1189,28 +1187,37 @@ def agregar_categoria():
     nombre_categoria = request.form["nombre_categoria"]
 
     cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO categorias (nombre_categoria) VALUES (%s)",
+    cur.execute("INSERT INTO categorias_empleados (nombre_categoria) VALUES (%s)",
                 (nombre_categoria,))
     mysql.connection.commit()
     cur.close()
 
     return redirect(url_for("registrar_empleado"))
 
-# ===================== EDITAR CATEGORÍA =====================
-@app.route("/editar_categoria/<int:id_categoria>", methods=["POST"])
-def editar_categoria(id_categoria):
-    nombre_categoria = request.form["nombre_categoria"]
 
+# ===================== EDITAR CATEGORÍA =====================
+@app.route("/editar_categoria/<int:id_categoria_em>", methods=["POST"])
+def editar_categoria(id_categoria_em):
+    nombre_categoria = request.form["nombre_categoria"]
     cur = mysql.connection.cursor()
     cur.execute(
-        "UPDATE categorias SET nombre_categoria=%s WHERE id_categoria=%s",
-        (nombre_categoria, id_categoria)
+        "UPDATE categorias_empleados SET nombre_categoria=%s WHERE id_categoria_em=%s",
+        (nombre_categoria, id_categoria_em)
     )
     mysql.connection.commit()
     cur.close()
 
     return redirect(url_for("registrar_empleado"))
 
+# ===================== ELIMINAR CATEGORÍA =====================
+@app.route("/eliminar_categoria/<int:id_categoria_em>")
+def eliminar_categoria(id_categoria_em):
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM categorias_empleados WHERE id_categoria_em = %s",
+                (id_categoria_em,))
+    mysql.connection.commit()
+    cur.close()
+    return redirect(url_for("registrar_empleado"))
 
 
 # ===================== AGREGAR PRODUCTO =====================
@@ -1219,19 +1226,23 @@ def agregar_producto_empleado():
     nombre = request.form["nombre"]
     precio = request.form["precio"]
     descripcion = request.form["descripcion"]
-    id_categoria = request.form["id_categoria"]
+    id_categoria_em = request.form["id_categoria_em"]
 
     cur = mysql.connection.cursor()
+    cur.execute("SELECT id_categoria_em FROM categorias_empleados WHERE id_categoria_em = %s", (id_categoria_em,))
+    categoria = cur.fetchone()
+
+    if not categoria:
+        return "Error: La categoría no existe", 400  # Si no existe la categoría, mostramos un error
+
     cur.execute("""
-        INSERT INTO productos_empleados (nombre, precio,
-        descripcion, id_categoria)
+        INSERT INTO productos_empleados (nombre, precio, descripcion, id_categoria_em)
         VALUES (%s, %s, %s, %s)
-    """, (nombre, precio, descripcion, id_categoria))
+    """, (nombre, precio, descripcion, id_categoria_em))
     mysql.connection.commit()
     cur.close()
 
     return redirect(url_for("registrar_empleado"))
-
 
 
 # ===================== EDITAR PRODUCTO =====================
@@ -1240,14 +1251,14 @@ def editar_producto_empleado(id_producto_em):
     nombre = request.form["nombre"]
     precio = request.form["precio"]
     descripcion = request.form["descripcion"]
-    id_categoria = request.form["id_categoria"]
+    id_categoria_em = request.form["id_categoria_em"]
 
     cur = mysql.connection.cursor()
     cur.execute("""
         UPDATE productos_empleados
-        SET nombre=%s, precio=%s, descripcion=%s, id_categoria=%s
+        SET nombre=%s, precio=%s, descripcion=%s, id_categoria_em=%s
         WHERE id_producto_em=%s
-    """, (nombre, precio, descripcion, id_categoria, id_producto_em))
+    """, (nombre, precio, descripcion, id_categoria_em, id_producto_em))
     mysql.connection.commit()
     cur.close()
 
@@ -1264,23 +1275,12 @@ def eliminar_producto_empleado(id_producto_em):
     return redirect(url_for("registrar_empleado"))
 
 
-# ===================== ELIMINAR CATEGORÍA =====================
-@app.route("/eliminar_categoria/<int:id_categoria>")
-def eliminar_categoria(id_categoria):
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM categorias WHERE id_categoria = %s",
-                (id_categoria,))
-    mysql.connection.commit()
-    cur.close()
-    return redirect(url_for("registrar_empleado"))
-
 
 # ===================== CALCULADORA =====================
 @app.route("/calculadora")
 def calculadora():
     cur = mysql.connection.cursor()
-
-    cur.execute("SELECT * FROM categorias")
+    cur.execute("SELECT * FROM categorias_empleados")
     categorias = cur.fetchall()
 
     cur.execute("SELECT * FROM productos_empleados")
@@ -1290,16 +1290,81 @@ def calculadora():
     return render_template("calculadora.html", categorias=categorias,
                            productos=productos)
 
+
+# ==================== Registrar pagos ==============
+
+
+from datetime import datetime
+from flask import request, redirect, url_for, flash
+import json
+
+@app.route('/registrar_pago_restaurante', methods=['POST'])
+def registrar_pago_restaurante():
+    try:
+        # Obtener datos del formulario
+        id_mesa = request.form.get('id_mesa')
+        total = float(request.form.get('total', 0))
+        dinero_cliente = float(request.form.get('dinero_cliente', 0))
+        productos_json = request.form.get('productos', '[]')
+        productos = json.loads(productos_json)
+
+        fecha = datetime.now().date()
+        hora = datetime.now().strftime("%H:%M:%S")
+
+        # Validación básica
+        if not id_mesa or total <= 0 or len(productos) == 0:
+            flash("Datos de la orden incompletos.", "error")
+            return redirect(url_for('mesas_empleado'))
+
+        cur = mysql.connection.cursor()
+
+        # Insertar pago principal
+        cur.execute("""
+            INSERT INTO pagos_restaurante (id_mesa, fecha, hora, total)
+            VALUES (%s, %s, %s, %s)
+        """, (id_mesa, fecha, hora, total))
+        id_pago_restaurante = cur.lastrowid
+
+        # Insertar detalles de cada producto
+        for p in productos:
+            cur.execute("""
+                INSERT INTO detalle_pedido_restaurante 
+                (id_pago_restaurante, id_producto_em, cantidad, precio_unitario)
+                VALUES (%s, %s, %s, %s)
+            """, (
+                id_pago_restaurante,
+                p['id_producto_em'],
+                p['cantidad'],
+                p['precio']
+            ))
+
+        mysql.connection.commit()
+        flash("✅ Pago registrado correctamente.", "success")
+        return redirect(url_for('mesas_empleado'))
+
+    except Exception as e:
+        print("Error MySQL:", e)
+        flash(f"Error al registrar el pago: {e}", "error")
+        return redirect(url_for('mesas_empleado'))
+
+    finally:
+        cur.close()
+
+
 # ===================== MESAS Y ORDENES =====================
 @app.route('/mesas_empleado')
 def mesas_empleado():
     return render_template('mesas_empleado.html')
 
+@app.route('/historial_pagos_restaurante')
+def historial_pagos_restaurante():
+    return render_template('historial_pagos_restaurante.html')
+
+
 # ===================== Y ORDENES =====================
 @app.route('/orden/<int:mesa_id>', methods=['GET', 'POST'])
 def orden_mesa(mesa_id):
     cur = mysql.connection.cursor()
-
     if request.method == 'POST':
         productos_seleccionados = request.form.getlist('producto')
         total = request.form.get('total', 0)
@@ -1315,13 +1380,12 @@ def orden_mesa(mesa_id):
                 VALUES (%s, %s, CURDATE(), CURTIME(), %s, %s, %s, %s, %s)
             """, (tipo_entrega, mesa_id, metodo_pago, telefono, total,
                   'pendiente', 0))
-
         mysql.connection.commit()
         cur2.close()
         cur.close()
         return redirect(url_for('mesas_empleado'))
 
-    cur.execute("SELECT * FROM categorias")
+    cur.execute("SELECT * FROM categorias_empleados")
     categorias = cur.fetchall()
 
     cur.execute("SELECT * FROM productos_empleados")
@@ -1330,6 +1394,7 @@ def orden_mesa(mesa_id):
     cur.close()
     return render_template('calculadora.html', mesa=mesa_id,
                            categorias=categorias, productos=productos)
+
     
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
@@ -1358,7 +1423,7 @@ def agregar_reserva():
         return redirect(url_for("reservas_empleado"))
 
     nombre = request.form["nombre"]
-    documento_identidad = request.form["documento_identidad"]
+    documento = request.form["documento"]
     telefono = request.form["telefono"]
     hora = request.form["hora"]
     cant_personas = request.form["cant_personas"]
@@ -1378,11 +1443,11 @@ def agregar_reserva():
     try:
         cur.execute("""
             INSERT INTO reservas (
-                nombre, documento_identidad, telefono, fecha, hora,
+                nombre, documento, telefono, fecha, hora,
                 cant_personas, tipo_evento, comentarios, id_usuario, estado
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
-            nombre, documento_identidad, telefono, fecha, hora,
+            nombre, documento, telefono, fecha, hora,
             cant_personas, tipo_evento, comentarios, id_usuario, estado
         ))
         mysql.connection.commit()
@@ -1421,7 +1486,7 @@ def editar_reserva(id_reserva):
 
     # Actualizar datos
     nombre = request.form["nombre"]
-    documento_identidad = request.form["documento_identidad"]
+    documento = request.form["documento"]
     telefono = request.form["telefono"]
     hora = request.form["hora"]
     cant_personas = request.form["cant_personas"]
@@ -1433,7 +1498,7 @@ def editar_reserva(id_reserva):
     cur.execute("""
         UPDATE reservas SET
             nombre=%s,
-            documento_identidad=%s,
+            documento=%s,
             telefono=%s,
             fecha=%s,
             hora=%s,
@@ -1443,7 +1508,7 @@ def editar_reserva(id_reserva):
             id_usuario=%s,
             estado=%s
         WHERE id_reserva=%s
-    """, (nombre, documento_identidad, telefono, nueva_fecha, hora,
+    """, (nombre, documento, telefono, nueva_fecha, hora,
           cant_personas, tipo_evento, comentarios, id_usuario, estado, id_reserva))
     mysql.connection.commit()
     cur.close()
@@ -1511,7 +1576,7 @@ def buscar_reservas():
         cur.execute("""
             SELECT * FROM reservas
             WHERE estado IN ('Pendiente', 'Confirmada')
-            AND (nombre LIKE %s OR documento_identidad LIKE %s OR telefono LIKE %s)
+            AND (nombre LIKE %s OR documento LIKE %s OR telefono LIKE %s)
             ORDER BY fecha, hora
         """, (like_query, like_query, like_query))
     else:
@@ -1538,7 +1603,7 @@ def historial_reservas_em():
         cur.execute("""
             SELECT * FROM reservas
             WHERE estado = 'Completada' AND (
-                nombre LIKE %s OR telefono LIKE %s OR documento_identidad LIKE %s
+                nombre LIKE %s OR telefono LIKE %s OR documento LIKE %s
             )
             ORDER BY fecha DESC, hora DESC
         """, (like_query, like_query, like_query))

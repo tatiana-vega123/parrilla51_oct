@@ -245,27 +245,30 @@
 
   <!-- BOTONES DE ZONA -->
   <div class="zona">
-    <button class="zona-btn">Zona 1</button>
+    <button class="zona-btn historial-btn" onclick="window.location.href='{{ url_for('historial_pagos_restaurante') }}'">
+      Historial
+    </button>
   </div>
 
   <!-- GRID DE MESAS -->
   <div class="grid" id="mesasGrid"></div>
 
-  <script>
-    const mesasGrid = document.getElementById('mesasGrid');
+<script>
+  const mesasGrid = document.getElementById('mesasGrid');
 
-    for (let i = 1; i <= 21; i++) {
-      const mesa = document.createElement('div');
-      mesa.className = 'mesa';
-      mesa.textContent = i;
+  for (let i = 1; i <= 20; i++) {  // Cambié 21 a 20
+    const mesa = document.createElement('div');
+    mesa.className = 'mesa';
+    mesa.textContent = i;
 
-      mesa.onclick = () => {
-        window.location.href = `/orden/${i}`;
-      };
+    mesa.onclick = () => {
+      window.location.href = `/orden/${i}`;
+    };
 
-      mesasGrid.appendChild(mesa);
-    }
-  </script>
+    mesasGrid.appendChild(mesa);
+  }
+</script>
+
 
 </body>
 </html>

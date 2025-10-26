@@ -273,7 +273,7 @@
             <h5 class="card-title">Reserva #{{ res.id_reserva }}</h5>
             <p class="card-text">
               <b>Nombre:</b> {{ res.nombre }}<br />
-              <b>Documento de Identidad:</b> {{ res.documento_identidad }}<br />
+              <b>Documento de Identidad:</b> {{ res.documento }}<br />
               <b>Teléfono:</b> {{ res.telefono }}<br />
               <b>Fecha:</b> {{ res.fecha }}<br />
               <b>Hora:</b> {{ res.hora }}<br />
@@ -318,8 +318,8 @@
               <input type="text" class="form-control mb-3" name="nombre" value="{{ res.nombre }}" />
 
               <label class="form-label">Documento de Identidad</label>
-              <input type="text" pattern="[0-9]+" class="form-control mb-3" name="documento_identidad"
-                value="{{ res.documento_identidad }}" />
+              <input type="text" pattern="[0-9]+" class="form-control mb-3" name="documento"
+                value="{{ res.documento }}" />
 
               <label class="form-label">Teléfono</label>
               <input type="text" class="form-control mb-3" name="telefono" value="{{ res.telefono }}" />
@@ -433,7 +433,7 @@
             type="text"
             pattern="[0-9]+"
             class="form-control mb-3"
-            name="documento_identidad"
+            name="documento"
             required
           />
 

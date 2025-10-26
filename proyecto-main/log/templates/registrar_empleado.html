@@ -88,16 +88,16 @@
           <li class="list-group-item d-flex justify-content-between align-items-center">
             {{ c.nombre_categoria }}
             <div>
-              <a href="{{ url_for('eliminar_categoria', id_categoria=c.id_categoria) }}" class="btn btn-danger btn-sm">Eliminar</a>
-              <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditarCategoria{{ c.id_categoria }}">Editar</button>
+              <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalEliminar{{ c.id_categoria_em }}">Eliminar</a>
+              <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditarCategoria{{ c.id_categoria_em }}">Editar</button>
             </div>
           </li>
 
           <!-- Modal Editar Categoría -->
-          <div class="modal fade" id="modalEditarCategoria{{ c.id_categoria }}" tabindex="-1">
+          <div class="modal fade" id="modalEditarCategoria{{ c.id_categoria_em }}" tabindex="-1">
             <div class="modal-dialog">
               <div class="modal-content">
-                <form method="POST" action="{{ url_for('editar_categoria', id_categoria=c.id_categoria) }}">
+                <form method="POST" action="{{ url_for('editar_categoria', id_categoria_em=c.id_categoria_em) }}">
                   <div class="modal-header">
                     <h5 class="modal-title">Editar Categoría</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -110,6 +110,25 @@
                     <button type="submit" class="btn btn-success">Guardar cambios</button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Confirmación Eliminar Categoría -->
+          <div class="modal fade" id="modalEliminar{{ c.id_categoria_em }}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Confirmar Eliminación</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <p>¿Estás seguro de que deseas eliminar la categoría <strong>{{ c.nombre_categoria }}</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <a href="{{ url_for('eliminar_categoria', id_categoria_em=c.id_categoria_em) }}" class="btn btn-danger">Eliminar</a>
+                </div>
               </div>
             </div>
           </div>
@@ -128,7 +147,7 @@
           <li class="list-group-item d-flex justify-content-between align-items-center">
             {{ p.nombre }} - ${{ "{:,.0f}".format(p.precio) }} [{{ p.nombre_categoria }}]
             <div>
-              <a href="{{ url_for('eliminar_producto_empleado', id_producto_em=p.id_producto_em) }}" class="btn btn-danger btn-sm">Eliminar</a>
+              <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalEliminarProducto{{ p.id_producto_em }}">Eliminar</a>
               <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditarProducto{{ p.id_producto_em }}">Editar</button>
             </div>
           </li>
@@ -157,9 +176,9 @@
                     </div>
                     <div class="mb-2">
                       <label>Categoría</label>
-                      <select name="id_categoria" class="form-select">
+                      <select name="id_categoria_em" class="form-select">
                         {% for c in categorias %}
-                        <option value="{{ c.id_categoria }}" {% if c.nombre_categoria == p.nombre_categoria %}selected{% endif %}>
+                        <option value="{{ c.id_categoria_em }}" {% if c.nombre_categoria == p.nombre_categoria %}selected{% endif %}>
                           {{ c.nombre_categoria }}
                         </option>
                         {% endfor %}
@@ -171,6 +190,25 @@
                     <button type="submit" class="btn btn-success">Guardar cambios</button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Confirmación Eliminar Producto -->
+          <div class="modal fade" id="modalEliminarProducto{{ p.id_producto_em }}" tabindex="-1">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Confirmar Eliminación</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                  <p>¿Estás seguro de que deseas eliminar el producto <strong>{{ p.nombre }}</strong>?</p>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <a href="{{ url_for('eliminar_producto_empleado', id_producto_em=p.id_producto_em) }}" class="btn btn-danger">Eliminar</a>
+                </div>
               </div>
             </div>
           </div>
@@ -210,39 +248,40 @@
       <div class="modal-content">
         <form method="POST" action="{{ url_for('agregar_producto_empleado') }}">
           <div class="modal-header">
-            <h5 class="modal-title">Nuevo Producto</h5>
+            <h5 class="modal-title">Agregar Producto</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <div class="mb-2">
-              <label>Nombre del producto</label>
-              <input type="text" name="nombre" class="form-control" required>
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre del Producto</label>
+              <input type="text" id="nombre" name="nombre" class="form-control" required>
             </div>
-            <div class="mb-2">
-              <label>Precio</label>
-              <input type="number" step="0.01" name="precio" class="form-control" required>
+            <div class="mb-3">
+              <label for="precio" class="form-label">Precio</label>
+              <input type="number" id="precio" name="precio" class="form-control" required>
             </div>
-            <div class="mb-2">
-              <label>Descripción</label>
-              <textarea name="descripcion" class="form-control"></textarea>
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">Descripción</label>
+            <textarea id="descripcion" name="descripcion" class="form-control" placeholder=""></textarea>
             </div>
-            <div class="mb-2">
-              <label>Categoría</label>
-              <select name="id_categoria" class="form-select" required>
-                {% for c in categorias %}
-                <option value="{{ c.id_categoria }}">{{ c.nombre_categoria }}</option>
+            <div class="mb-3">
+              <label for="id_categoria_em" class="form-label">Categoría</label>
+              <select name="id_categoria_em" id="id_categoria_em" class="form-select" required>
+                {% for categoria in categorias %}
+                  <option value="{{ categoria.id_categoria_em }}">{{ categoria.nombre_categoria }}</option>
                 {% endfor %}
               </select>
             </div>
           </div>
           <div class="modal-footer">
             <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="submit" class="btn btn-primary">Agregar Producto</button>
           </div>
         </form>
       </div>
     </div>
   </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
