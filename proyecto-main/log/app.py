@@ -1168,6 +1168,7 @@ def eliminar_carrito(id_producto):
 # Ejecuta la app en modo debug (útil durante desarrollo)
 
 
+
 # -------------------- EMPLEADO ----------------------
 # ===================== LISTAR PRODUCTOS Y CATEGORÍAS =====================
 
@@ -1191,7 +1192,6 @@ def registrar_empleado():
     return render_template("registrar_empleado.html", productos=productos,
                            categorias=categorias)
 
-
 # ===================== AGREGAR CATEGORÍA =====================
 @app.route("/agregar_categoria", methods=["POST"])
 def agregar_categoria():
@@ -1204,7 +1204,6 @@ def agregar_categoria():
     cur.close()
 
     return redirect(url_for("registrar_empleado"))
-
 
 # ===================== EDITAR CATEGORÍA =====================
 @app.route("/editar_categoria/<int:id_categoria>", methods=["POST"])
@@ -1220,6 +1219,7 @@ def editar_categoria(id_categoria):
     cur.close()
 
     return redirect(url_for("registrar_empleado"))
+
 
 
 # ===================== AGREGAR PRODUCTO =====================
@@ -1242,9 +1242,10 @@ def agregar_producto_empleado():
     return redirect(url_for("registrar_empleado"))
 
 
+
 # ===================== EDITAR PRODUCTO =====================
 @app.route("/editar_producto_em/<int:id_producto_em>", methods=["POST"])
-def editar_producto_empleado(id_producto):
+def editar_producto_empleado(id_producto_em):
     nombre = request.form["nombre"]
     precio = request.form["precio"]
     descripcion = request.form["descripcion"]
@@ -1254,11 +1255,21 @@ def editar_producto_empleado(id_producto):
     cur.execute("""
         UPDATE productos_empleados
         SET nombre=%s, precio=%s, descripcion=%s, id_categoria=%s
-        WHERE id_producto=%s
-    """, (nombre, precio, descripcion, id_categoria, id_producto))
+        WHERE id_producto_em=%s
+    """, (nombre, precio, descripcion, id_categoria, id_producto_em))
     mysql.connection.commit()
     cur.close()
 
+    return redirect(url_for("registrar_empleado"))
+
+# ===================== ELIMINAR PRODUCTO =====================
+@app.route("/eliminar_producto_em/<int:id_producto_em>")
+def eliminar_producto_empleado(id_producto_em):
+    cur = mysql.connection.cursor()
+    cur.execute("DELETE FROM productos_empleados WHERE id_producto_em = %s",
+                (id_producto_em,))
+    mysql.connection.commit()
+    cur.close()
     return redirect(url_for("registrar_empleado"))
 
 
@@ -1268,17 +1279,6 @@ def eliminar_categoria(id_categoria):
     cur = mysql.connection.cursor()
     cur.execute("DELETE FROM categorias WHERE id_categoria = %s",
                 (id_categoria,))
-    mysql.connection.commit()
-    cur.close()
-    return redirect(url_for("registrar_empleado"))
-
-
-# ===================== ELIMINAR PRODUCTO =====================
-@app.route("/eliminar_producto_em/<int:id_producto_em>")
-def eliminar_producto_empleado(id_producto):
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM productos_empleados WHERE id_producto = %s",
-                (id_producto,))
     mysql.connection.commit()
     cur.close()
     return redirect(url_for("registrar_empleado"))
@@ -1298,7 +1298,6 @@ def calculadora():
     cur.close()
     return render_template("calculadora.html", categorias=categorias,
                            productos=productos)
-
 
 # ===================== MESAS Y ORDENES =====================
 @app.route('/mesas_empleado')
@@ -1340,89 +1339,159 @@ def orden_mesa(mesa_id):
     cur.close()
     return render_template('calculadora.html', mesa=mesa_id,
                            categorias=categorias, productos=productos)
+    
+from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for, flash
 
+from flask import Flask, render_template, request, redirect, url_for, flash
+from flask_mysqldb import MySQL, MySQLdb
+from datetime import datetime
+from MySQLdb import IntegrityError 
 
-# ===================== RESERVAS =====================
+# ===================== RESERVAS empleado =====================
 
 @app.route("/reservas_empleado")
 def reservas_empleado():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM reservas ORDER BY fecha, hora")
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("SELECT * FROM reservas ORDER BY fecha DESC, hora DESC") 
     reservas = cur.fetchall()
     cur.close()
-    return render_template("reservas_empleado.html", reservas=reservas)
+
+    today = datetime.today().strftime('%Y-%m-%d')
+    return render_template("reservas_empleado.html", reservas=reservas, today=today)
 
 
 @app.route("/agregar_reserva", methods=["POST"])
 def agregar_reserva():
     fecha = request.form["fecha"]
-    hora = request.form["hora"]
-    cant_personas = request.form["cant_personas"]
-    estado = request.form.get("estado", "disponible")
-    cod_mesa = request.form["cod_mesa"]
-    telefono = request.form["telefono"]
-    id_usuario = request.form["id_usuario"]
 
     cur = mysql.connection.cursor()
+
+    # Validar reserva por fecha
+    cur.execute("SELECT COUNT(*) FROM reservas WHERE fecha = %s", (fecha,))
+    result = cur.fetchone()
+    count = result['COUNT(*)'] if result else 0
+
+    if count > 0:
+        flash("Ya existe una reserva para esta fecha. Solo se permite una por día.", "error")
+        cur.close()
+        return redirect(url_for("reservas_empleado"))
+
+    nombre = request.form["nombre"]
+    documento_identidad = request.form["documento_identidad"]
+    telefono = request.form["telefono"]
+    hora = request.form["hora"]
+    cant_personas = request.form["cant_personas"]
+    tipo_evento = request.form["tipo_evento"]
+    comentarios = request.form.get("comentarios", "")
+    id_usuario = request.form["id_usuario"]
+    estado = request.form.get("estado", "disponible")
+
+    # Validar que el id_usuario exista
+    cur.execute("SELECT id_usuario FROM usuarios WHERE id_usuario = %s", (id_usuario,))
+    usuario = cur.fetchone()
+    if not usuario:
+        flash("⚠️ El ID de usuario ingresado no existe. Por favor ingresa un ID válido.", "error")
+        cur.close()
+        return redirect(url_for("reservas_empleado"))
+
+    try:
+        cur.execute("""
+            INSERT INTO reservas (
+                nombre, documento_identidad, telefono, fecha, hora,
+                cant_personas, tipo_evento, comentarios, id_usuario, estado
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            nombre, documento_identidad, telefono, fecha, hora,
+            cant_personas, tipo_evento, comentarios, id_usuario, estado
+        ))
+        mysql.connection.commit()
+        flash("Reserva agregada exitosamente.", "success")
+
+    except IntegrityError as e:
+        mysql.connection.rollback()
+        flash(f"⚠️ Error de restricción de clave foránea: {str(e)}", "error")
+
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f"Ocurrió un error inesperado: {str(e)}", "error")
+
+    finally:
+        cur.close()
+
+    return redirect(url_for("reservas_empleado"))
+
+
+@app.route("/editar_reserva/<int:id_reserva>", methods=["POST"])
+def editar_reserva(id_reserva):
+    nueva_fecha = request.form["fecha"]
+
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cur.execute("""
-        INSERT INTO reservas (fecha, hora, cant_personas, estado,
-        cod_mesa, telefono, id_usuario)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-    """, (fecha, hora, cant_personas, estado, cod_mesa, telefono, id_usuario))
+        SELECT COUNT(*) AS total FROM reservas
+        WHERE fecha = %s AND id_reserva != %s
+    """, (nueva_fecha, id_reserva))
+    count = cur.fetchone()
+    count = count["total"] if count else 0
+
+    if count > 0:
+        flash("Ya existe una reserva para esta fecha. Solo se permite una por día.", "error")
+        cur.close()
+        return redirect(url_for("reservas_empleado"))
+
+    # Actualizar datos
+    nombre = request.form["nombre"]
+    documento_identidad = request.form["documento_identidad"]
+    telefono = request.form["telefono"]
+    hora = request.form["hora"]
+    cant_personas = request.form["cant_personas"]
+    tipo_evento = request.form["tipo_evento"]
+    comentarios = request.form["comentarios"]
+    id_usuario = request.form["id_usuario"]
+    estado = request.form.get("estado", "disponible")
+
+    cur.execute("""
+        UPDATE reservas SET
+            nombre=%s,
+            documento_identidad=%s,
+            telefono=%s,
+            fecha=%s,
+            hora=%s,
+            cant_personas=%s,
+            tipo_evento=%s,
+            comentarios=%s,
+            id_usuario=%s,
+            estado=%s
+        WHERE id_reserva=%s
+    """, (nombre, documento_identidad, telefono, nueva_fecha, hora,
+          cant_personas, tipo_evento, comentarios, id_usuario, estado, id_reserva))
     mysql.connection.commit()
     cur.close()
+
+    flash("Reserva editada exitosamente.", "success")
     return redirect(url_for("reservas_empleado"))
+
 
 
 @app.route('/eliminar_reserva/<int:id_reserva>', methods=['POST'])
 def eliminar_reserva(id_reserva):
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cur.execute("DELETE FROM reservas WHERE id_reserva = %s", (id_reserva,))
-    if cur.rowcount == 0:
-        print(f"No se encontró la reserva con id {id_reserva},"
-              "no se eliminó nada.")
     mysql.connection.commit()
     cur.close()
-    return redirect(url_for('reservas_empleado'))
-
-
-@app.route('/editar_reserva/<int:id_reserva>', methods=['POST'])
-def editar_reserva(id_reserva):
-    fecha = request.form.get("fecha")
-    hora = request.form.get("hora")
-    cant_personas = request.form.get("cant_personas")
-    estado = request.form.get("estado")
-    cod_mesa = request.form.get("cod_mesa")
-    telefono = request.form.get("telefono")
-    id_usuario = request.form.get("id_usuario")
-
-    cur = mysql.connection.cursor()
-    cur.execute("""
-        UPDATE reservas
-        SET fecha=%s, hora=%s, cant_personas=%s, estado=%s, cod_mesa=%s,
-        telefono=%s, id_usuario=%s
-        WHERE id_reserva=%s
-    """, (fecha, hora, cant_personas, estado, cod_mesa, telefono,
-          id_usuario, id_reserva))
-    mysql.connection.commit()
-    cur.close()
+    flash("Reserva eliminada correctamente.", "success")
     return redirect(url_for('reservas_empleado'))
 
 
 @app.route('/cambiar_estado_reserva/<int:id_reserva>')
 def cambiar_estado_reserva(id_reserva):
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT estado FROM reservas WHERE id_reserva = %s",
-                (id_reserva,))
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("SELECT estado FROM reservas WHERE id_reserva = %s", (id_reserva,))
     reserva = cur.fetchone()
 
     if reserva:
         estado_actual = reserva["estado"]
-        nuevo_estado = (
-            "no disponible"
-            if estado_actual == "disponible"
-            else "disponible"
-        )
+        nuevo_estado = "no disponible" if estado_actual == "disponible" else "disponible"
         cur.execute("UPDATE reservas SET estado = %s WHERE id_reserva = %s",
                     (nuevo_estado, id_reserva))
         mysql.connection.commit()
@@ -1430,6 +1499,94 @@ def cambiar_estado_reserva(id_reserva):
     cur.close()
     return redirect(url_for('reservas_empleado'))
 
+
+# ===================== RESERVAS EMPLEADO =====================
+@app.route("/reservas_em")
+def reservas_em():
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("SELECT * FROM reservas WHERE estado IN ('Pendiente', 'Confirmada')")
+    reservas = cur.fetchall()
+    cur.close()
+    return render_template("reservas_empleado.html", reservas=reservas)
+
+
+# ===================== HISTORIAL RESERVAS EMPLEADO =====================
+@app.route("/historial_reservas_em")
+def historial_reservas_em():
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("SELECT * FROM reservas WHERE estado = 'no disponible'")
+    historial = cur.fetchall()
+    cur.close()
+    return render_template("historial_reservas_em.html", historial=historial)
+
+
+# ===================== CAMBIAR ESTADO DE RESERVA (EMPLEADO) =====================
+@app.route("/cambiar_estado_reserva_em/<int:id_reserva>", methods=["POST"])
+def cambiar_estado_reserva_em(id_reserva):
+    nuevo_estado = request.form.get("nuevo_estado")
+
+    if nuevo_estado not in ["Confirmada", "Completada"]:
+        flash("Estado no válido.", "error")
+        return redirect(url_for("reservas_em"))
+
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cur.execute("UPDATE reservas SET estado = %s WHERE id_reserva = %s", (nuevo_estado, id_reserva))
+    mysql.connection.commit()
+    cur.close()
+
+    flash(f"Estado actualizado a {nuevo_estado}.", "success")
+
+    # Redirige según el nuevo estado
+    if nuevo_estado == "Completada":
+        return redirect(url_for("historial_reservas_em"))
+    else:
+        return redirect(url_for("reservas_em"))
+
+
+@app.route("/buscar_reservas", methods=["GET"])
+def buscar_reservas():
+    search_query = request.args.get("search_query", "").strip()
+
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    if search_query:
+        like_query = f"%{search_query}%"
+        cur.execute("""
+            SELECT * FROM reservas
+            WHERE nombre LIKE %s OR documento_identidad LIKE %s OR telefono LIKE %s
+            ORDER BY fecha, hora
+        """, (like_query, like_query, like_query))
+    else:
+        cur.execute("SELECT * FROM reservas ORDER BY fecha, hora")
+
+    reservas = cur.fetchall()
+    cur.close()
+    return render_template("reservas_empleado.html", reservas=reservas)
+
+
+@app.route("/historial_reservas_em_v2")
+def historial_reservas_em_v2():
+    query = request.args.get("query", "").strip()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+
+    if query:
+        like_query = f"%{query}%"
+        cur.execute("""
+            SELECT * FROM reservas
+            WHERE estado = 'no disponible' AND (
+                nombre LIKE %s OR telefono LIKE %s OR documento_identidad LIKE %s
+            )
+            ORDER BY fecha DESC, hora DESC
+        """, (like_query, like_query, like_query))
+    else:
+        cur.execute("""
+            SELECT * FROM reservas
+            WHERE estado = 'no disponible'
+            ORDER BY fecha DESC, hora DESC
+        """)
+
+    historial = cur.fetchall()
+    cur.close()
+    return render_template("historial_reservas_em.html", historial=historial)
 
 # ===================== ORDENES REGISTRADAS =====================
 
@@ -1490,7 +1647,7 @@ def get_productos(id_categoria):
     cur = mysql.connection.cursor()
     cur.execute("""
         SELECT id_producto, nombre, precio
-        FROM productos_empleados
+        FROM productos
         WHERE id_categoria = %s
     """, (id_categoria,))
     productos = cur.fetchall()
@@ -1499,16 +1656,17 @@ def get_productos(id_categoria):
 
 
 # ===================== TEST DB =====================
-@app.route("/testdb_empleado")
-def testdb_empleado():
+@app.route("/test_db")
+def test_db():
     try:
         cur = mysql.connection.cursor()
         cur.execute("SHOW TABLES;")
-        tables = cur.fetchall()
+        tablas = cur.fetchall()
         cur.close()
-        return f"✅ Conectado. Tablas: {tables}"
+        return f"✅ Conectado correctamente. Tablas: {tablas}"
     except Exception as e:
-        return f"❌ Error conectando a MySQL: {str(e)}"
+        return f"❌ Error de conexión: {e}"
+
 
 
 # ===================== MAIN =====================
