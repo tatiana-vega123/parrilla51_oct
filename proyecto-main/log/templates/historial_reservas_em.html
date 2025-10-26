@@ -12,6 +12,9 @@
       color: #f0f0f0;
       margin: 0;
       padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
     .navbar-custom {
@@ -93,6 +96,16 @@
       color: #ffd700;
       border: 1px solid #ff4444;
     }
+
+    /* Footer */
+    footer {
+      background: #2f2f2f;
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      border-top: 2px solid #ffd700;
+      margin-top: auto;
+    }
   </style>
 </head>
 <body>
@@ -105,9 +118,8 @@
       <span>Parrilla 51</span>
     </div>
 
-
     <!-- Derecha: Botón -->
-    <a href="{{ url_for('reservas_em') }}" class="btn-volver">Volver a Reservas</a>
+    <a href="{{ url_for('reservas_empleado') }}" class="btn-volver">Volver a Reservas</a>
   </nav>
 
   <!-- CONTENIDO -->
@@ -115,7 +127,7 @@
     <h3 class="text-center mb-4">Historial de Reservas (finalizadas)</h3>
 
     <!-- Búsqueda -->
-    <form method="GET" action="{{ url_for('historial_reservas_em_v2') }}" class="mb-4">
+    <form method="GET" action="{{ url_for('historial_reservas_em') }}" class="mb-4">
       <div class="input-group">
         <input 
           type="text" 
@@ -158,6 +170,11 @@
       </div>
     {% endif %}
   </div>
+
+  <!-- FOOTER -->
+  <footer>
+    © 2025 Parrilla 51 - Todos los derechos reservados
+  </footer>
 
 </body>
 </html>

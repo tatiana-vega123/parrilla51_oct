@@ -1304,7 +1304,7 @@ def calculadora():
 def mesas_empleado():
     return render_template('mesas_empleado.html')
 
-
+# ===================== Y ORDENES =====================
 @app.route('/orden/<int:mesa_id>', methods=['GET', 'POST'])
 def orden_mesa(mesa_id):
     cur = mysql.connection.cursor()
@@ -1342,23 +1342,12 @@ def orden_mesa(mesa_id):
     
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash
-
-from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mysqldb import MySQL, MySQLdb
 from datetime import datetime
 from MySQLdb import IntegrityError 
 
 # ===================== RESERVAS empleado =====================
 
-@app.route("/reservas_empleado")
-def reservas_empleado():
-    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cur.execute("SELECT * FROM reservas ORDER BY fecha DESC, hora DESC") 
-    reservas = cur.fetchall()
-    cur.close()
-
-    today = datetime.today().strftime('%Y-%m-%d')
-    return render_template("reservas_empleado.html", reservas=reservas, today=today)
 
 
 @app.route("/agregar_reserva", methods=["POST"])
@@ -1483,64 +1472,42 @@ def eliminar_reserva(id_reserva):
     return redirect(url_for('reservas_empleado'))
 
 
-@app.route('/cambiar_estado_reserva/<int:id_reserva>')
-def cambiar_estado_reserva(id_reserva):
+
+@app.route("/reservas_empleado")
+def reservas_empleado():
     cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cur.execute("SELECT estado FROM reservas WHERE id_reserva = %s", (id_reserva,))
-    reserva = cur.fetchone()
-
-    if reserva:
-        estado_actual = reserva["estado"]
-        nuevo_estado = "no disponible" if estado_actual == "disponible" else "disponible"
-        cur.execute("UPDATE reservas SET estado = %s WHERE id_reserva = %s",
-                    (nuevo_estado, id_reserva))
-        mysql.connection.commit()
-
-    cur.close()
-    return redirect(url_for('reservas_empleado'))
-
-
-# ===================== RESERVAS EMPLEADO =====================
-@app.route("/reservas_em")
-def reservas_em():
-    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cur.execute("SELECT * FROM reservas WHERE estado IN ('Pendiente', 'Confirmada')")
+    cur.execute("""
+        SELECT * FROM reservas
+        WHERE estado IN ('Pendiente', 'Confirmada')
+        ORDER BY fecha DESC, hora DESC
+    """)
     reservas = cur.fetchall()
     cur.close()
-    return render_template("reservas_empleado.html", reservas=reservas)
 
-
-# ===================== HISTORIAL RESERVAS EMPLEADO =====================
-@app.route("/historial_reservas_em")
-def historial_reservas_em():
-    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cur.execute("SELECT * FROM reservas WHERE estado = 'no disponible'")
-    historial = cur.fetchall()
-    cur.close()
-    return render_template("historial_reservas_em.html", historial=historial)
+    today = datetime.today().strftime('%Y-%m-%d')
+    return render_template("reservas_empleado.html", reservas=reservas, today=today)
 
 
 # ===================== CAMBIAR ESTADO DE RESERVA (EMPLEADO) =====================
+from flask import jsonify
+
 @app.route("/cambiar_estado_reserva_em/<int:id_reserva>", methods=["POST"])
 def cambiar_estado_reserva_em(id_reserva):
     nuevo_estado = request.form.get("nuevo_estado")
 
     if nuevo_estado not in ["Confirmada", "Completada"]:
-        flash("Estado no válido.", "error")
-        return redirect(url_for("reservas_em"))
+        return jsonify({"error": "Estado no válido"}), 400
 
-    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cur.execute("UPDATE reservas SET estado = %s WHERE id_reserva = %s", (nuevo_estado, id_reserva))
-    mysql.connection.commit()
-    cur.close()
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("UPDATE reservas SET estado = %s WHERE id_reserva = %s", (nuevo_estado, id_reserva))
+        mysql.connection.commit()
+        cur.close()
+        return jsonify({"message": f"Estado actualizado a {nuevo_estado}."}), 200
+    except Exception as e:
+        print(f"Error al actualizar estado: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 
-    flash(f"Estado actualizado a {nuevo_estado}.", "success")
-
-    # Redirige según el nuevo estado
-    if nuevo_estado == "Completada":
-        return redirect(url_for("historial_reservas_em"))
-    else:
-        return redirect(url_for("reservas_em"))
 
 
 @app.route("/buscar_reservas", methods=["GET"])
@@ -1552,19 +1519,26 @@ def buscar_reservas():
         like_query = f"%{search_query}%"
         cur.execute("""
             SELECT * FROM reservas
-            WHERE nombre LIKE %s OR documento_identidad LIKE %s OR telefono LIKE %s
+            WHERE estado IN ('Pendiente', 'Confirmada')
+            AND (nombre LIKE %s OR documento_identidad LIKE %s OR telefono LIKE %s)
             ORDER BY fecha, hora
         """, (like_query, like_query, like_query))
     else:
-        cur.execute("SELECT * FROM reservas ORDER BY fecha, hora")
+        cur.execute("""
+            SELECT * FROM reservas
+            WHERE estado IN ('Pendiente', 'Confirmada')
+            ORDER BY fecha, hora
+        """)
 
     reservas = cur.fetchall()
     cur.close()
-    return render_template("reservas_empleado.html", reservas=reservas)
+
+    today = datetime.today().strftime('%Y-%m-%d')
+    return render_template("reservas_empleado.html", reservas=reservas, today=today)
 
 
-@app.route("/historial_reservas_em_v2")
-def historial_reservas_em_v2():
+@app.route("/historial_reservas_em")
+def historial_reservas_em():
     query = request.args.get("query", "").strip()
     cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
@@ -1572,7 +1546,7 @@ def historial_reservas_em_v2():
         like_query = f"%{query}%"
         cur.execute("""
             SELECT * FROM reservas
-            WHERE estado = 'no disponible' AND (
+            WHERE estado = 'Completada' AND (
                 nombre LIKE %s OR telefono LIKE %s OR documento_identidad LIKE %s
             )
             ORDER BY fecha DESC, hora DESC
@@ -1580,7 +1554,7 @@ def historial_reservas_em_v2():
     else:
         cur.execute("""
             SELECT * FROM reservas
-            WHERE estado = 'no disponible'
+            WHERE estado = 'Completada'
             ORDER BY fecha DESC, hora DESC
         """)
 

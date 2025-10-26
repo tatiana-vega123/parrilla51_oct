@@ -151,6 +151,55 @@
       box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
     }
 
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: #3a3a3a;
+      color: #f0f0f0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+
+    *, *::before, *::after {
+      box-sizing: inherit;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ==== CONTENIDO PRINCIPAL ==== */
+    main {
+      flex: 1; /* ocupa todo el espacio disponible */
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      flex: 1;
+      width: 100%;
+      padding-bottom: 40px; /* espacio para que el contenido no toque el footer */
+      margin-bottom: 0 !important;
+    }
+
+    /* ==== FOOTER ==== */
+    footer {
+      background: #2f2f2f;
+      color: #fff;
+      text-align: center;
+      padding: 12px 0;
+      border-top: 2px solid #ffd700;
+      font-size: 15px;
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: auto; /* se queda al fondo del contenido */
+      flex-shrink: 0;
+    }
+
   </style>
 </head>
 
@@ -165,24 +214,25 @@
       <li><a href="{{ url_for('mesas_empleado') }}">Mesas</a></li>
       <li><a href="{{ url_for('registrar_empleado') }}">Registrar</a></li>
       <li><a href="{{ url_for('ordenes_empleado') }}">Órdenes</a></li>
-      <li><a href="{{ url_for('reservas_em') }}">Reservas</a></li>
+      <li><a href="{{ url_for('reservas_empleado') }}">Reservas</a></li>
     </ul>
   </nav>
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="container mt-3">
-      {% for category, message in messages %}
-        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}
-
   <!-- Contenedor principal -->
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container mt-3" id="flash-messages">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
   <div class="container mt-4 position-relative">
+    
     <h3 class="text-center mb-3">Reservas Disponibles</h3>
 
     <!-- Barra de búsqueda -->
@@ -204,13 +254,20 @@
 
     <!-- Botón Historial -->
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <a href="{{ url_for('historial_reservas_em') }}" class="btn btn-warning">Historial</a>
+    <div class="position-relative mb-3">
+    <a href="{{ url_for('historial_reservas_em') }}" class="btn btn-warning position-absolute end-0">
+      Historial
+    </a>
+
+    <div class="text-center">
+      <button class="btn btn-danger px-5" data-bs-toggle="modal" data-bs-target="#modalAgregar">
+        + Agregar Reserva
+      </button>
     </div>
 
     <div class="row mt-4 g-4">
       {% for res in reservas %}
-      <div class="col-12 col-md-6 col-lg-4 d-flex">
+      <div class="col-12 col-md-6 col-lg-4 d-flex" id="reserva-{{ res.id_reserva }}">
         <div class="card shadow-sm p-3 flex-fill">
           <div class="card-body">
             <h5 class="card-title">Reserva #{{ res.id_reserva }}</h5>
@@ -224,7 +281,8 @@
               <b>Tipo de Evento:</b> {{ res.tipo_evento }}<br />
               <b>Comentarios:</b> {{ res.comentarios }}<br />
               <b>ID Usuario:</b> {{ res.id_usuario }}<br />
-              <b>Estado:</b> {{ res.estado }}
+              <b>Estado:</b> <span id="estado{{ res.id_reserva }}" class="estado {{ res.estado }}">{{ res.estado }}</span>
+
             </p>
 
             <div class="d-flex justify-content-between mt-3">
@@ -298,12 +356,7 @@
               <label class="form-label">ID Usuario</label>
               <input type="number" class="form-control mb-3" name="id_usuario" value="{{ res.id_usuario }}" />
 
-              <label class="form-label">Estado</label>
-              <select class="form-select mb-3" name="estado">
-                <option value="Pendiente" {% if res.estado == 'Pendiente' %}selected{% endif %}>Pendiente</option>
-                <option value="Confirmada" {% if res.estado == 'Confirmada' %}selected{% endif %}>Confirmada</option>
-                <option value="Completada" {% if res.estado == 'Completada' %}selected{% endif %}>Completada</option>
-              </select>
+              <input type="hidden" name="estado" value="{{ res.estado }}">
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -335,19 +388,18 @@
         </div>
       </div>
 
+
       <!-- 🔹 Modal Cambiar Estado -->
-      <div class="modal fade" id="modalEstado{{ res.id_reserva }}" tabindex="-1"
-        aria-labelledby="modalEstadoLabel{{ res.id_reserva }}" aria-hidden="true">
+      <div class="modal fade" id="modalEstado{{ res.id_reserva }}" tabindex="-1">
         <div class="modal-dialog">
-          <form action="{{ url_for('cambiar_estado_reserva', id_reserva=res.id_reserva) }}" method="POST"
-            class="modal-content p-3">
+          <form onsubmit="return cambiarEstado(event, {{ res.id_reserva }})" class="modal-content p-3">
             <div class="modal-header">
-              <h5 class="modal-title" id="modalEstadoLabel{{ res.id_reserva }}">Cambiar Estado de la Reserva</h5>
+              <h5 class="modal-title">Cambiar Estado de la Reserva</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
               <label class="form-label">Seleccione el nuevo estado</label>
-              <select class="form-select mb-3" name="nuevo_estado" required>
+              <select class="form-select" id="nuevoEstado{{ res.id_reserva }}">
                 <option value="">Seleccione...</option>
                 <option value="Confirmada">Confirmada</option>
                 <option value="Completada">Completada</option>
@@ -360,14 +412,8 @@
           </form>
         </div>
       </div>
+
       {% endfor %}
-    </div>
-
-
-    <div class="text-center mt-4">
-      <button class="btn btn-danger px-5" data-bs-toggle="modal" data-bs-target="#modalAgregar">
-        + Agregar Reserva
-      </button>
     </div>
 
    <!-- Modal Agregar -->
@@ -487,6 +533,113 @@
         });
       });
     </script>
-</body>
+    <!-- 🟢 Contenedor de notificaciones -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toastContainer"></div>
+    <script>
+    function cambiarEstado(event, id_reserva) {
+        event.preventDefault();
 
+        const select = document.getElementById(`nuevoEstado${id_reserva}`);
+        const nuevoEstado = select.value;
+
+        if (!nuevoEstado) {
+            alert("Selecciona un estado");
+            return false;
+        }
+
+        // Enviar actualización al servidor (Flask)
+        const formData = new FormData();
+        formData.append("nuevo_estado", nuevoEstado);
+
+        fetch(`/cambiar_estado_reserva_em/${id_reserva}`, {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                // Actualizar el estado visualmente
+                const estadoSpan = document.getElementById(`estado${id_reserva}`);
+                estadoSpan.textContent = nuevoEstado;
+
+                // Si se completó, ocultar la card
+                if (nuevoEstado === "Completada") {
+                    const card = document.getElementById(`reserva-${id_reserva}`);
+                    if (card) card.style.display = 'none';
+                }
+
+                mostrarToast("Estado actualizado correctamente ✅", "success");
+            } else {
+                mostrarToast("Error al actualizar el estado ⚠️", "error");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            mostrarToast("Error en la conexión con el servidor ❌", "error");
+        });
+
+        // Cerrar modal
+        const modalEl = document.getElementById(`modalEstado${id_reserva}`);
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+
+        return false;
+    }
+    </script>
+
+    <!-- 🟢 Función para mostrar toasts -->
+    <script>
+    function mostrarToast(mensaje, tipo = "success") {
+      const toastContainer = document.getElementById("toastContainer");
+      const bgColor = tipo === "error" ? "text-bg-danger" : "text-bg-success";
+
+      const toast = document.createElement("div");
+      toast.className = `toast align-items-center ${bgColor} border-0`;
+      toast.role = "alert";
+      toast.ariaLive = "assertive";
+      toast.ariaAtomic = "true";
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body fw-semibold">${mensaje}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>`;
+
+      toastContainer.appendChild(toast);
+      const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+      bsToast.show();
+
+      // Elimina el toast del DOM después de desaparecer
+      toast.addEventListener("hidden.bs.toast", () => toast.remove());
+    }
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        setTimeout(function() {
+          const alerts = document.querySelectorAll('#flash-messages .alert');
+          alerts.forEach(alert => {
+            alert.classList.add('fade-out');
+            setTimeout(() => {
+              const bsAlert = new bootstrap.Alert(alert);
+              bsAlert.close();
+            }, 500);
+          });
+        }, 3000);
+      });
+    </script>
+
+    <style>
+      .fade-out {
+        opacity: 0;
+        transition: opacity 0.5s ease-out;
+      }
+    </style>
+
+
+
+  </main>
+  <footer>
+  © 2025 Parrilla 51 - Todos los derechos reservados
+  </footer>
+</body>
 </html>
