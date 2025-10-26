@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-10-2025 a las 17:27:27
+-- Tiempo de generación: 26-10-2025 a las 23:07:06
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -126,6 +126,25 @@ INSERT INTO `categorias` (`id_categoria`, `nombre_categoria`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `categorias_empleados`
+--
+
+CREATE TABLE `categorias_empleados` (
+  `id_categoria_em` int(11) NOT NULL,
+  `nombre_categoria` varchar(150) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `categorias_empleados`
+--
+
+INSERT INTO `categorias_empleados` (`id_categoria_em`, `nombre_categoria`) VALUES
+(12, 'pollo'),
+(14, 'carne');
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `detalle_pedido`
 --
 
@@ -170,11 +189,18 @@ INSERT INTO `detalle_pedido` (`id_detalle`, `cod_pedido`, `cod_producto`, `canti
 
 CREATE TABLE `detalle_pedido_restaurante` (
   `id_detalle_pedido_restaurante` int(11) NOT NULL,
-  `id_pago_restaurante` int(11) DEFAULT NULL,
-  `id_producto_em` int(11) DEFAULT NULL,
+  `id_pago_restaurante` int(11) NOT NULL,
+  `id_producto_em` int(11) NOT NULL,
   `cantidad` int(11) NOT NULL,
   `precio_unitario` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_pedido_restaurante`
+--
+
+INSERT INTO `detalle_pedido_restaurante` (`id_detalle_pedido_restaurante`, `id_pago_restaurante`, `id_producto_em`, `cantidad`, `precio_unitario`) VALUES
+(1, 2, 6, 1, 15000.00);
 
 -- --------------------------------------------------------
 
@@ -239,17 +265,34 @@ CREATE TABLE `insumos` (
 --
 
 CREATE TABLE `mesas` (
-  `id_mesa` int(11) NOT NULL,
-  `estado` enum('ocupada','libre') DEFAULT NULL
+  `id_mesa` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `mesas`
 --
 
-INSERT INTO `mesas` (`id_mesa`, `estado`) VALUES
-(1, ''),
-(2, '');
+INSERT INTO `mesas` (`id_mesa`) VALUES
+(1),
+(2),
+(3),
+(4),
+(5),
+(6),
+(7),
+(8),
+(9),
+(10),
+(11),
+(12),
+(13),
+(14),
+(15),
+(16),
+(17),
+(18),
+(19),
+(20);
 
 -- --------------------------------------------------------
 
@@ -259,11 +302,18 @@ INSERT INTO `mesas` (`id_mesa`, `estado`) VALUES
 
 CREATE TABLE `pagos_restaurante` (
   `id_pago_restaurante` int(11) NOT NULL,
-  `id_mesa` int(11) DEFAULT NULL,
+  `id_mesa` int(11) NOT NULL,
   `fecha` date NOT NULL,
   `hora` time NOT NULL,
-  `total` decimal(10,2) NOT NULL
+  `total` decimal(10,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `pagos_restaurante`
+--
+
+INSERT INTO `pagos_restaurante` (`id_pago_restaurante`, `id_mesa`, `fecha`, `hora`, `total`) VALUES
+(2, 1, '2025-10-26', '17:02:55', 15000.00);
 
 -- --------------------------------------------------------
 
@@ -440,8 +490,15 @@ CREATE TABLE `productos_empleados` (
   `nombre` varchar(150) NOT NULL,
   `precio` decimal(10,2) NOT NULL,
   `descripcion` text DEFAULT NULL,
-  `id_categoria` int(11) NOT NULL
+  `id_categoria_em` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `productos_empleados`
+--
+
+INSERT INTO `productos_empleados` (`id_producto_em`, `nombre`, `precio`, `descripcion`, `id_categoria_em`) VALUES
+(6, 'queso ', 15000.00, '', 12);
 
 -- --------------------------------------------------------
 
@@ -468,7 +525,7 @@ CREATE TABLE `reservas` (
 --
 
 INSERT INTO `reservas` (`id_reserva`, `fecha`, `hora`, `cant_personas`, `estado`, `telefono`, `id_usuario`, `nombre`, `documento`, `tipo_evento`, `comentarios`) VALUES
-(19, '2025-12-11', '2:00pm-4:00pm', '4', 'Pendiente', '3202995114', 16, 'aaa', '111', 'Almuerzo', 'hola'),
+(19, '2025-12-11', '2:00pm-4:00pm', '4', 'Completada', '3202995114', 16, 'aaa', '111', 'Almuerzo', 'hola'),
 (20, '2025-10-25', '12:30pm-2:30pm', '7', 'confirmada', '3202995114', 16, 'Tommy ', '1111111', 'Almuerzo', '# app.py unificado (comentado por bloques y funciones) from flask import (     Flask, render_template, request, redirect, url_for, session,     jsonify, flash, send_file ) from flask_mysqldb import MySQL from flask_mail import Mail   # falta message # fro'),
 (21, '2025-10-31', '2:00pm-4:00pm', '11', 'Pendiente', '3202995114', 16, 'Tommy ', '111', 'Almuerzo', 'hola'),
 (22, '2025-11-01', '1:00pm-3:00pm', '12', 'Pendiente', '3202995114', 16, 'aa', '332222', 'Otro', 'a');
@@ -681,11 +738,35 @@ CREATE TABLE `vista_stock_bajo` (
 -- --------------------------------------------------------
 
 --
+-- Estructura Stand-in para la vista `vista_total_pagos`
+-- (Véase abajo para la vista actual)
+--
+CREATE TABLE `vista_total_pagos` (
+`id_pago_restaurante` int(11)
+,`id_mesa` int(11)
+,`fecha` date
+,`hora` time
+,`total_registrado` decimal(10,2)
+,`total_calculado` decimal(42,2)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Estructura para la vista `vista_alertas`
 --
 DROP TABLE IF EXISTS `vista_alertas`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_alertas`  AS SELECT `alertas`.`id_alerta` AS `id_alerta`, `alertas`.`mensaje` AS `mensaje`, `alertas`.`fecha` AS `fecha`, `alertas`.`tipo` AS `tipo` FROM `alertas` ORDER BY `alertas`.`fecha` DESC ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura para la vista `vista_total_pagos`
+--
+DROP TABLE IF EXISTS `vista_total_pagos`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_total_pagos`  AS SELECT `p`.`id_pago_restaurante` AS `id_pago_restaurante`, `p`.`id_mesa` AS `id_mesa`, `p`.`fecha` AS `fecha`, `p`.`hora` AS `hora`, `p`.`total` AS `total_registrado`, coalesce(sum(`d`.`cantidad` * `d`.`precio_unitario`),0) AS `total_calculado` FROM (`pagos_restaurante` `p` left join `detalle_pedido_restaurante` `d` on(`p`.`id_pago_restaurante` = `d`.`id_pago_restaurante`)) GROUP BY `p`.`id_pago_restaurante`, `p`.`id_mesa`, `p`.`fecha`, `p`.`hora`, `p`.`total` ;
 
 --
 -- Índices para tablas volcadas
@@ -698,12 +779,18 @@ ALTER TABLE `categorias`
   ADD PRIMARY KEY (`id_categoria`);
 
 --
+-- Indices de la tabla `categorias_empleados`
+--
+ALTER TABLE `categorias_empleados`
+  ADD PRIMARY KEY (`id_categoria_em`);
+
+--
 -- Indices de la tabla `detalle_pedido_restaurante`
 --
 ALTER TABLE `detalle_pedido_restaurante`
   ADD PRIMARY KEY (`id_detalle_pedido_restaurante`),
-  ADD KEY `id_pago_restaurante` (`id_pago_restaurante`),
-  ADD KEY `id_producto_em` (`id_producto_em`);
+  ADD KEY `idx_detalle_pago` (`id_pago_restaurante`),
+  ADD KEY `idx_detalle_producto` (`id_producto_em`);
 
 --
 -- Indices de la tabla `mesas`
@@ -716,7 +803,7 @@ ALTER TABLE `mesas`
 --
 ALTER TABLE `pagos_restaurante`
   ADD PRIMARY KEY (`id_pago_restaurante`),
-  ADD KEY `id_mesa` (`id_mesa`);
+  ADD KEY `idx_pagos_mesa` (`id_mesa`);
 
 --
 -- Indices de la tabla `pedidos`
@@ -735,7 +822,7 @@ ALTER TABLE `productos`
 --
 ALTER TABLE `productos_empleados`
   ADD PRIMARY KEY (`id_producto_em`),
-  ADD KEY `fk_categoria` (`id_categoria`);
+  ADD KEY `fk_categoria` (`id_categoria_em`);
 
 --
 -- Indices de la tabla `reservas`
@@ -761,22 +848,28 @@ ALTER TABLE `categorias`
   MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
+-- AUTO_INCREMENT de la tabla `categorias_empleados`
+--
+ALTER TABLE `categorias_empleados`
+  MODIFY `id_categoria_em` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
 -- AUTO_INCREMENT de la tabla `detalle_pedido_restaurante`
 --
 ALTER TABLE `detalle_pedido_restaurante`
-  MODIFY `id_detalle_pedido_restaurante` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_detalle_pedido_restaurante` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `mesas`
 --
 ALTER TABLE `mesas`
-  MODIFY `id_mesa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_mesa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `pagos_restaurante`
 --
 ALTER TABLE `pagos_restaurante`
-  MODIFY `id_pago_restaurante` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_pago_restaurante` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `pedidos`
@@ -794,7 +887,7 @@ ALTER TABLE `productos`
 -- AUTO_INCREMENT de la tabla `productos_empleados`
 --
 ALTER TABLE `productos_empleados`
-  MODIFY `id_producto_em` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_producto_em` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `reservas`
@@ -816,20 +909,20 @@ ALTER TABLE `usuarios`
 -- Filtros para la tabla `detalle_pedido_restaurante`
 --
 ALTER TABLE `detalle_pedido_restaurante`
-  ADD CONSTRAINT `detalle_pedido_restaurante_ibfk_1` FOREIGN KEY (`id_pago_restaurante`) REFERENCES `pagos_restaurante` (`id_pago_restaurante`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `detalle_pedido_restaurante_ibfk_2` FOREIGN KEY (`id_producto_em`) REFERENCES `productos_empleados` (`id_producto_em`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_detalle_pago` FOREIGN KEY (`id_pago_restaurante`) REFERENCES `pagos_restaurante` (`id_pago_restaurante`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_detalle_producto` FOREIGN KEY (`id_producto_em`) REFERENCES `productos_empleados` (`id_producto_em`) ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `pagos_restaurante`
 --
 ALTER TABLE `pagos_restaurante`
-  ADD CONSTRAINT `pagos_restaurante_ibfk_1` FOREIGN KEY (`id_mesa`) REFERENCES `mesas` (`id_mesa`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_pagos_mesa` FOREIGN KEY (`id_mesa`) REFERENCES `mesas` (`id_mesa`) ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `productos_empleados`
 --
 ALTER TABLE `productos_empleados`
-  ADD CONSTRAINT `fk_categoria` FOREIGN KEY (`id_categoria`) REFERENCES `categorias` (`id_categoria`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_categoria_em` FOREIGN KEY (`id_categoria_em`) REFERENCES `categorias_empleados` (`id_categoria_em`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `reservas`
