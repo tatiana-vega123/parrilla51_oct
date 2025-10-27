@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 26-10-2025 a las 23:07:06
--- Versión del servidor: 10.4.32-MariaDB
--- Versión de PHP: 8.2.12
+-- Tiempo de generación: 27-10-2025 a las 19:00:38
+-- Versión del servidor: 8.0.43
+-- Versión de PHP: 8.0.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -39,10 +39,10 @@ DELIMITER ;
 --
 
 CREATE TABLE `alertas` (
-  `id_alerta` int(11) NOT NULL,
-  `mensaje` varchar(255) NOT NULL,
+  `id_alerta` int NOT NULL,
+  `mensaje` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `fecha` datetime NOT NULL,
-  `tipo` enum('stock','pedido','reserva','usuario','producto') NOT NULL
+  `tipo` enum('stock','pedido','reserva','usuario','producto') COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -103,8 +103,8 @@ INSERT INTO `alertas` (`id_alerta`, `mensaje`, `fecha`, `tipo`) VALUES
 --
 
 CREATE TABLE `categorias` (
-  `id_categoria` int(11) NOT NULL,
-  `nombre_categoria` varchar(150) DEFAULT NULL
+  `id_categoria` int NOT NULL,
+  `nombre_categoria` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -130,8 +130,8 @@ INSERT INTO `categorias` (`id_categoria`, `nombre_categoria`) VALUES
 --
 
 CREATE TABLE `categorias_empleados` (
-  `id_categoria_em` int(11) NOT NULL,
-  `nombre_categoria` varchar(150) DEFAULT NULL
+  `id_categoria_em` int NOT NULL,
+  `nombre_categoria` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -149,11 +149,11 @@ INSERT INTO `categorias_empleados` (`id_categoria_em`, `nombre_categoria`) VALUE
 --
 
 CREATE TABLE `detalle_pedido` (
-  `id_detalle` int(11) NOT NULL,
-  `cod_pedido` int(11) DEFAULT NULL,
-  `cod_producto` int(11) DEFAULT NULL,
-  `cantidad` bigint(20) DEFAULT NULL,
-  `precio_unitario` bigint(20) DEFAULT NULL,
+  `id_detalle` int NOT NULL,
+  `cod_pedido` int DEFAULT NULL,
+  `cod_producto` int DEFAULT NULL,
+  `cantidad` bigint DEFAULT NULL,
+  `precio_unitario` bigint DEFAULT NULL,
   `iva` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -165,18 +165,18 @@ INSERT INTO `detalle_pedido` (`id_detalle`, `cod_pedido`, `cod_producto`, `canti
 (1, 1, 2, 1, 1000, NULL),
 (2, 2, 2, 1, 1000, NULL),
 (3, 3, 2, 1, 1000, NULL),
-(0, 0, 16, 3, 28000, NULL),
-(0, 0, 34, 1, 4000, NULL),
-(0, 0, 35, 1, 3500, NULL),
-(0, 0, 16, 1, 28000, NULL),
-(0, 0, 35, 1, 3500, NULL),
-(0, 0, 37, 1, 4000, NULL),
-(0, 0, 11, 1, 24000, NULL),
-(0, 0, 36, 1, 3500, NULL),
-(0, 0, 37, 1, 4000, NULL),
-(0, 0, 10, 1, 19000, NULL),
-(0, 0, 36, 1, 3500, NULL),
-(0, 0, 37, 1, 4000, NULL),
+(0, 1, 16, 3, 28000, NULL),
+(0, 1, 34, 1, 4000, NULL),
+(0, 1, 35, 1, 3500, NULL),
+(0, 1, 16, 1, 28000, NULL),
+(0, 1, 35, 1, 3500, NULL),
+(0, 1, 37, 1, 4000, NULL),
+(0, 1, 11, 1, 24000, NULL),
+(0, 1, 36, 1, 3500, NULL),
+(0, 1, 37, 1, 4000, NULL),
+(0, 1, 10, 1, 19000, NULL),
+(0, 1, 36, 1, 3500, NULL),
+(0, 1, 37, 1, 4000, NULL),
 (0, 11, 16, 1, 28000, NULL),
 (0, 11, 35, 1, 3500, NULL),
 (0, 11, 36, 1, 3500, NULL);
@@ -188,10 +188,10 @@ INSERT INTO `detalle_pedido` (`id_detalle`, `cod_pedido`, `cod_producto`, `canti
 --
 
 CREATE TABLE `detalle_pedido_restaurante` (
-  `id_detalle_pedido_restaurante` int(11) NOT NULL,
-  `id_pago_restaurante` int(11) NOT NULL,
-  `id_producto_em` int(11) NOT NULL,
-  `cantidad` int(11) NOT NULL,
+  `id_detalle_pedido_restaurante` int NOT NULL,
+  `id_pago_restaurante` int NOT NULL,
+  `id_producto_em` int NOT NULL,
+  `cantidad` int NOT NULL,
   `precio_unitario` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -209,10 +209,10 @@ INSERT INTO `detalle_pedido_restaurante` (`id_detalle_pedido_restaurante`, `id_p
 --
 
 CREATE TABLE `domicilios` (
-  `id_domicilio` int(11) NOT NULL,
-  `cod_pedido` int(11) DEFAULT NULL,
-  `cod_usuario` int(11) DEFAULT NULL,
-  `cod_direccion` varchar(100) DEFAULT NULL
+  `id_domicilio` int NOT NULL,
+  `cod_pedido` int DEFAULT NULL,
+  `cod_usuario` int DEFAULT NULL,
+  `cod_direccion` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -222,12 +222,12 @@ CREATE TABLE `domicilios` (
 --
 
 CREATE TABLE `historial_pedidos` (
-  `id_historial` int(11) NOT NULL,
-  `id_pedido` int(11) NOT NULL,
-  `estado` enum('pendiente','en preparacion','entregado','cancelado') NOT NULL,
+  `id_historial` int NOT NULL,
+  `id_pedido` int NOT NULL,
+  `estado` enum('pendiente','en preparacion','entregado','cancelado') COLLATE utf8mb4_general_ci NOT NULL,
   `fecha` date NOT NULL,
   `hora` time NOT NULL,
-  `fecha_cambio` datetime NOT NULL DEFAULT current_timestamp()
+  `fecha_cambio` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -249,13 +249,13 @@ INSERT INTO `historial_pedidos` (`id_historial`, `id_pedido`, `estado`, `fecha`,
 --
 
 CREATE TABLE `insumos` (
-  `id_insumo` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL,
-  `cantidad` int(11) NOT NULL DEFAULT 0,
-  `precio` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `id_insumo` int NOT NULL,
+  `nombre` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `cantidad` int NOT NULL DEFAULT '0',
+  `precio` decimal(10,2) NOT NULL DEFAULT '0.00',
   `fecha_vencimiento` date DEFAULT NULL,
-  `lote` varchar(50) DEFAULT NULL,
-  `subcategoria_id` int(11) DEFAULT NULL
+  `lote` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `subcategoria_id` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -265,7 +265,7 @@ CREATE TABLE `insumos` (
 --
 
 CREATE TABLE `mesas` (
-  `id_mesa` int(11) NOT NULL
+  `id_mesa` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -301,11 +301,11 @@ INSERT INTO `mesas` (`id_mesa`) VALUES
 --
 
 CREATE TABLE `pagos_restaurante` (
-  `id_pago_restaurante` int(11) NOT NULL,
-  `id_mesa` int(11) NOT NULL,
+  `id_pago_restaurante` int NOT NULL,
+  `id_mesa` int NOT NULL,
   `fecha` date NOT NULL,
   `hora` time NOT NULL,
-  `total` decimal(10,2) DEFAULT 0.00
+  `total` decimal(10,2) DEFAULT '0.00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -322,32 +322,31 @@ INSERT INTO `pagos_restaurante` (`id_pago_restaurante`, `id_mesa`, `fecha`, `hor
 --
 
 CREATE TABLE `pedidos` (
-  `id_pedido` int(11) NOT NULL,
-  `tipo_entrega` enum('restaurante','domicilio') DEFAULT NULL,
-  `cod_mesa` int(11) DEFAULT NULL,
+  `id_pedido` int NOT NULL,
+  `tipo_entrega` enum('restaurante','domicilio') COLLATE utf8mb4_general_ci DEFAULT NULL,
   `fecha` date DEFAULT NULL,
   `hora` time DEFAULT NULL,
-  `metodo_pago` varchar(50) DEFAULT NULL,
-  `telefono` bigint(20) DEFAULT NULL,
-  `total` bigint(20) DEFAULT NULL,
-  `estado` enum('entregado','cancelado','pendiente','en preparacion') DEFAULT 'pendiente',
-  `cod_usuario` int(11) DEFAULT NULL,
-  `direccion` varchar(255) DEFAULT NULL
+  `metodo_pago` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `telefono` bigint DEFAULT NULL,
+  `total` bigint DEFAULT NULL,
+  `estado` enum('entregado','cancelado','pendiente','en preparacion') COLLATE utf8mb4_general_ci DEFAULT 'pendiente',
+  `cod_usuario` int DEFAULT NULL,
+  `direccion` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `pedidos`
 --
 
-INSERT INTO `pedidos` (`id_pedido`, `tipo_entrega`, `cod_mesa`, `fecha`, `hora`, `metodo_pago`, `telefono`, `total`, `estado`, `cod_usuario`, `direccion`) VALUES
-(1, 'restaurante', 1, '2025-09-15', '22:17:23', NULL, NULL, 1000, 'pendiente', 16, NULL),
-(2, 'domicilio', NULL, '2025-09-15', '22:53:18', NULL, NULL, 1000, 'pendiente', 16, NULL),
-(3, 'domicilio', NULL, '2025-09-15', '22:56:40', 'tarjeta', NULL, 1000, 'pendiente', 16, NULL),
-(4, '', NULL, '2025-10-26', '01:46:58', 'efectivo', NULL, 91500, 'pendiente', 1, NULL),
-(5, '', NULL, '2025-10-26', '01:47:53', 'efectivo', NULL, 35500, 'pendiente', 1, NULL),
-(6, '', NULL, '2025-10-26', '01:51:49', 'efectivo', NULL, 31500, 'pendiente', 1, NULL),
-(7, 'restaurante', NULL, '2025-10-26', '01:55:32', 'efectivo', NULL, 26500, 'pendiente', 1, NULL),
-(11, 'domicilio', NULL, '2025-10-26', '01:58:20', 'efectivo', 3271738299, 35000, 'pendiente', 1, 'calle 20 # 4-11');
+INSERT INTO `pedidos` (`id_pedido`, `tipo_entrega`, `fecha`, `hora`, `metodo_pago`, `telefono`, `total`, `estado`, `cod_usuario`, `direccion`) VALUES
+(1, 'restaurante', '2025-09-15', '22:17:23', NULL, NULL, 1000, 'pendiente', 16, NULL),
+(2, 'domicilio', '2025-09-15', '22:53:18', NULL, NULL, 1000, 'pendiente', 16, NULL),
+(3, 'domicilio', '2025-09-15', '22:56:40', 'tarjeta', NULL, 1000, 'pendiente', 16, NULL),
+(4, '', '2025-10-26', '01:46:58', 'efectivo', NULL, 91500, 'pendiente', 16, NULL),
+(5, '', '2025-10-26', '01:47:53', 'efectivo', NULL, 35500, 'pendiente', 16, NULL),
+(6, '', '2025-10-26', '01:51:49', 'efectivo', NULL, 31500, 'pendiente', 16, NULL),
+(7, 'restaurante', '2025-10-26', '01:55:32', 'efectivo', NULL, 26500, 'pendiente', 16, NULL),
+(11, 'domicilio', '2025-10-26', '01:58:20', 'efectivo', 3271738299, 35000, 'pendiente', 16, 'calle 20 # 4-11');
 
 --
 -- Disparadores `pedidos`
@@ -382,28 +381,17 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `pedido_mesa`
---
-
-CREATE TABLE `pedido_mesa` (
-  `cod_pedido` int(11) NOT NULL,
-  `cod_mesa` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `productos`
 --
 
 CREATE TABLE `productos` (
-  `id_producto` int(11) NOT NULL,
-  `nombre` varchar(60) DEFAULT NULL,
-  `cantidad` bigint(20) DEFAULT NULL,
-  `descripcion` varchar(150) DEFAULT NULL,
-  `precio` bigint(20) DEFAULT NULL,
-  `cod_categoria` int(11) DEFAULT NULL,
-  `imagen` varchar(255) DEFAULT NULL
+  `id_producto` int NOT NULL,
+  `nombre` varchar(60) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cantidad` bigint DEFAULT NULL,
+  `descripcion` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `precio` bigint DEFAULT NULL,
+  `cod_categoria` int DEFAULT NULL,
+  `imagen` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -486,11 +474,11 @@ DELIMITER ;
 --
 
 CREATE TABLE `productos_empleados` (
-  `id_producto_em` int(11) NOT NULL,
-  `nombre` varchar(150) NOT NULL,
+  `id_producto_em` int NOT NULL,
+  `nombre` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
   `precio` decimal(10,2) NOT NULL,
-  `descripcion` text DEFAULT NULL,
-  `id_categoria_em` int(11) DEFAULT NULL
+  `descripcion` text COLLATE utf8mb4_general_ci,
+  `id_categoria_em` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -507,17 +495,17 @@ INSERT INTO `productos_empleados` (`id_producto_em`, `nombre`, `precio`, `descri
 --
 
 CREATE TABLE `reservas` (
-  `id_reserva` int(11) NOT NULL,
+  `id_reserva` int NOT NULL,
   `fecha` date DEFAULT NULL,
-  `hora` enum('','11:30m-1:30pm','12:00pm-2:00pm','12:30pm-2:30pm','1:00pm-3:00pm','1:30pm-3:30pm','2:00pm-4:00pm','2:30pm-4:30pm') NOT NULL,
-  `cant_personas` enum('','1','2','3','4','5','6','7','8','9','10','11','12') DEFAULT NULL,
-  `estado` enum('Pendiente','confirmada','Completada') DEFAULT NULL,
-  `telefono` varchar(20) DEFAULT NULL,
-  `id_usuario` int(11) DEFAULT NULL,
-  `nombre` varchar(100) DEFAULT NULL,
-  `documento` varchar(50) DEFAULT NULL,
-  `tipo_evento` enum('','Almuerzo','Reunión','Celebración','Otro') DEFAULT NULL,
-  `comentarios` varchar(255) DEFAULT NULL
+  `hora` enum('','11:30m-1:30pm','12:00pm-2:00pm','12:30pm-2:30pm','1:00pm-3:00pm','1:30pm-3:30pm','2:00pm-4:00pm','2:30pm-4:30pm') COLLATE utf8mb4_general_ci NOT NULL,
+  `cant_personas` enum('','1','2','3','4','5','6','7','8','9','10','11','12') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `estado` enum('Pendiente','confirmada','Completada') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `telefono` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_usuario` int DEFAULT NULL,
+  `nombre` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `documento` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `tipo_evento` enum('','Almuerzo','Reunión','Celebración','Otro') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `comentarios` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -564,10 +552,10 @@ DELIMITER ;
 --
 
 CREATE TABLE `salida` (
-  `id_salida` int(11) NOT NULL,
+  `id_salida` int NOT NULL,
   `fecha` date DEFAULT NULL,
-  `cantidad` bigint(20) DEFAULT NULL,
-  `cod_producto` int(11) DEFAULT NULL
+  `cantidad` bigint DEFAULT NULL,
+  `cod_producto` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -577,8 +565,8 @@ CREATE TABLE `salida` (
 --
 
 CREATE TABLE `subcategorias_insumos` (
-  `id_subcategoria` int(11) NOT NULL,
-  `nombre_subcategoria` varchar(100) NOT NULL
+  `id_subcategoria` int NOT NULL,
+  `nombre_subcategoria` varchar(100) COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -588,16 +576,16 @@ CREATE TABLE `subcategorias_insumos` (
 --
 
 CREATE TABLE `usuarios` (
-  `id_usuario` int(11) NOT NULL,
-  `nombre` varchar(100) DEFAULT NULL,
-  `apellido` varchar(100) DEFAULT NULL,
-  `telefono` bigint(20) DEFAULT NULL,
-  `direccion` varchar(100) DEFAULT NULL,
-  `correo` varchar(100) DEFAULT NULL,
-  `contraseña` varchar(255) DEFAULT NULL,
-  `rol` enum('cliente','empleado','administrador') DEFAULT 'cliente',
-  `estado` enum('activo','inactivo') DEFAULT 'activo',
-  `token_activacion` varchar(255) DEFAULT NULL
+  `id_usuario` int NOT NULL,
+  `nombre` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `apellido` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `telefono` bigint DEFAULT NULL,
+  `direccion` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `correo` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `contraseña` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `rol` enum('cliente','empleado','administrador') COLLATE utf8mb4_general_ci DEFAULT 'cliente',
+  `estado` enum('activo','inactivo') COLLATE utf8mb4_general_ci DEFAULT 'activo',
+  `token_activacion` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -635,9 +623,9 @@ DELIMITER ;
 -- (Véase abajo para la vista actual)
 --
 CREATE TABLE `vista_alertas` (
-`id_alerta` int(11)
+`fecha` datetime
+,`id_alerta` int
 ,`mensaje` varchar(255)
-,`fecha` datetime
 ,`tipo` enum('stock','pedido','reserva','usuario','producto')
 );
 
@@ -648,14 +636,14 @@ CREATE TABLE `vista_alertas` (
 --
 
 CREATE TABLE `vista_detalle_pedidos` (
-  `id_detalle` int(11) DEFAULT NULL,
-  `id_pedido` int(11) DEFAULT NULL,
+  `id_detalle` int DEFAULT NULL,
+  `id_pedido` int DEFAULT NULL,
   `fecha` date DEFAULT NULL,
   `hora` time DEFAULT NULL,
-  `producto` varchar(60) DEFAULT NULL,
-  `cantidad` bigint(20) DEFAULT NULL,
-  `precio_unitario` bigint(20) DEFAULT NULL,
-  `subtotal` bigint(39) DEFAULT NULL
+  `producto` varchar(60) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cantidad` bigint DEFAULT NULL,
+  `precio_unitario` bigint DEFAULT NULL,
+  `subtotal` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -665,13 +653,13 @@ CREATE TABLE `vista_detalle_pedidos` (
 --
 
 CREATE TABLE `vista_historial_pedidos` (
-  `id_historial` int(11) DEFAULT NULL,
-  `id_pedido` int(11) DEFAULT NULL,
+  `id_historial` int DEFAULT NULL,
+  `id_pedido` int DEFAULT NULL,
   `fecha` date DEFAULT NULL,
   `hora` time DEFAULT NULL,
-  `nombre_usuario` varchar(100) DEFAULT NULL,
-  `apellido_usuario` varchar(100) DEFAULT NULL,
-  `estado` enum('pendiente','en preparacion','entregado','cancelado') DEFAULT NULL,
+  `nombre_usuario` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `apellido_usuario` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `estado` enum('pendiente','en preparacion','entregado','cancelado') COLLATE utf8mb4_general_ci DEFAULT NULL,
   `fecha_estado` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -682,13 +670,13 @@ CREATE TABLE `vista_historial_pedidos` (
 --
 
 CREATE TABLE `vista_pedidos_usuarios` (
-  `id_pedido` int(11) DEFAULT NULL,
-  `nombre` varchar(100) DEFAULT NULL,
-  `apellido` varchar(100) DEFAULT NULL,
+  `id_pedido` int DEFAULT NULL,
+  `nombre` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `apellido` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `fecha` date DEFAULT NULL,
   `hora` time DEFAULT NULL,
-  `total` bigint(20) DEFAULT NULL,
-  `estado` enum('entregado','cancelado','pendiente','en preparacion') DEFAULT NULL
+  `total` bigint DEFAULT NULL,
+  `estado` enum('entregado','cancelado','pendiente','en preparacion') COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -698,11 +686,11 @@ CREATE TABLE `vista_pedidos_usuarios` (
 --
 
 CREATE TABLE `vista_productos_categorias` (
-  `id_producto` int(11) DEFAULT NULL,
-  `nombre` varchar(60) DEFAULT NULL,
-  `precio` bigint(20) DEFAULT NULL,
-  `cantidad` bigint(20) DEFAULT NULL,
-  `nombre_categoria` varchar(150) DEFAULT NULL
+  `id_producto` int DEFAULT NULL,
+  `nombre` varchar(60) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `precio` bigint DEFAULT NULL,
+  `cantidad` bigint DEFAULT NULL,
+  `nombre_categoria` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -712,13 +700,13 @@ CREATE TABLE `vista_productos_categorias` (
 --
 
 CREATE TABLE `vista_reservas_mesas` (
-  `id_reserva` int(11) DEFAULT NULL,
+  `id_reserva` int DEFAULT NULL,
   `fecha` date DEFAULT NULL,
   `hora` time DEFAULT NULL,
-  `cant_personas` int(11) DEFAULT NULL,
-  `estado` enum('disponible','no disponible') DEFAULT NULL,
-  `id_mesa` int(11) DEFAULT NULL,
-  `capacidad` int(11) DEFAULT NULL
+  `cant_personas` int DEFAULT NULL,
+  `estado` enum('disponible','no disponible') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id_mesa` int DEFAULT NULL,
+  `capacidad` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -728,11 +716,11 @@ CREATE TABLE `vista_reservas_mesas` (
 --
 
 CREATE TABLE `vista_stock_bajo` (
-  `id_producto` int(11) DEFAULT NULL,
-  `nombre` varchar(60) DEFAULT NULL,
-  `cantidad` bigint(20) DEFAULT NULL,
-  `precio` bigint(20) DEFAULT NULL,
-  `estado_stock` varchar(16) DEFAULT NULL
+  `id_producto` int DEFAULT NULL,
+  `nombre` varchar(60) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `cantidad` bigint DEFAULT NULL,
+  `precio` bigint DEFAULT NULL,
+  `estado_stock` varchar(16) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -742,12 +730,12 @@ CREATE TABLE `vista_stock_bajo` (
 -- (Véase abajo para la vista actual)
 --
 CREATE TABLE `vista_total_pagos` (
-`id_pago_restaurante` int(11)
-,`id_mesa` int(11)
-,`fecha` date
+`fecha` date
 ,`hora` time
-,`total_registrado` decimal(10,2)
+,`id_mesa` int
+,`id_pago_restaurante` int
 ,`total_calculado` decimal(42,2)
+,`total_registrado` decimal(10,2)
 );
 
 -- --------------------------------------------------------
@@ -766,7 +754,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `vista_total_pagos`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_total_pagos`  AS SELECT `p`.`id_pago_restaurante` AS `id_pago_restaurante`, `p`.`id_mesa` AS `id_mesa`, `p`.`fecha` AS `fecha`, `p`.`hora` AS `hora`, `p`.`total` AS `total_registrado`, coalesce(sum(`d`.`cantidad` * `d`.`precio_unitario`),0) AS `total_calculado` FROM (`pagos_restaurante` `p` left join `detalle_pedido_restaurante` `d` on(`p`.`id_pago_restaurante` = `d`.`id_pago_restaurante`)) GROUP BY `p`.`id_pago_restaurante`, `p`.`id_mesa`, `p`.`fecha`, `p`.`hora`, `p`.`total` ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_total_pagos`  AS SELECT `p`.`id_pago_restaurante` AS `id_pago_restaurante`, `p`.`id_mesa` AS `id_mesa`, `p`.`fecha` AS `fecha`, `p`.`hora` AS `hora`, `p`.`total` AS `total_registrado`, coalesce(sum((`d`.`cantidad` * `d`.`precio_unitario`)),0) AS `total_calculado` FROM (`pagos_restaurante` `p` left join `detalle_pedido_restaurante` `d` on((`p`.`id_pago_restaurante` = `d`.`id_pago_restaurante`))) GROUP BY `p`.`id_pago_restaurante`, `p`.`id_mesa`, `p`.`fecha`, `p`.`hora`, `p`.`total` ;
 
 --
 -- Índices para tablas volcadas
@@ -783,6 +771,12 @@ ALTER TABLE `categorias`
 --
 ALTER TABLE `categorias_empleados`
   ADD PRIMARY KEY (`id_categoria_em`);
+
+--
+-- Indices de la tabla `detalle_pedido`
+--
+ALTER TABLE `detalle_pedido`
+  ADD KEY `fk_detalle_pedido_pedidos` (`cod_pedido`);
 
 --
 -- Indices de la tabla `detalle_pedido_restaurante`
@@ -809,7 +803,8 @@ ALTER TABLE `pagos_restaurante`
 -- Indices de la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
-  ADD PRIMARY KEY (`id_pedido`);
+  ADD PRIMARY KEY (`id_pedido`),
+  ADD KEY `fk_pedidos_usuarios` (`cod_usuario`);
 
 --
 -- Indices de la tabla `productos`
@@ -845,65 +840,71 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `categorias`
 --
 ALTER TABLE `categorias`
-  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id_categoria` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `categorias_empleados`
 --
 ALTER TABLE `categorias_empleados`
-  MODIFY `id_categoria_em` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id_categoria_em` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_pedido_restaurante`
 --
 ALTER TABLE `detalle_pedido_restaurante`
-  MODIFY `id_detalle_pedido_restaurante` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id_detalle_pedido_restaurante` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT de la tabla `mesas`
 --
 ALTER TABLE `mesas`
-  MODIFY `id_mesa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id_mesa` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de la tabla `pagos_restaurante`
 --
 ALTER TABLE `pagos_restaurante`
-  MODIFY `id_pago_restaurante` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id_pago_restaurante` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de la tabla `pedidos`
 --
 ALTER TABLE `pedidos`
-  MODIFY `id_pedido` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id_pedido` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id_producto` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT de la tabla `productos_empleados`
 --
 ALTER TABLE `productos_empleados`
-  MODIFY `id_producto_em` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id_producto_em` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `reservas`
 --
 ALTER TABLE `reservas`
-  MODIFY `id_reserva` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id_reserva` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id_usuario` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- Restricciones para tablas volcadas
 --
+
+--
+-- Filtros para la tabla `detalle_pedido`
+--
+ALTER TABLE `detalle_pedido`
+  ADD CONSTRAINT `fk_detalle_pedido_pedidos` FOREIGN KEY (`cod_pedido`) REFERENCES `pedidos` (`id_pedido`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `detalle_pedido_restaurante`
@@ -917,6 +918,12 @@ ALTER TABLE `detalle_pedido_restaurante`
 --
 ALTER TABLE `pagos_restaurante`
   ADD CONSTRAINT `fk_pagos_mesa` FOREIGN KEY (`id_mesa`) REFERENCES `mesas` (`id_mesa`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `pedidos`
+--
+ALTER TABLE `pedidos`
+  ADD CONSTRAINT `fk_pedidos_usuarios` FOREIGN KEY (`cod_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `productos_empleados`
