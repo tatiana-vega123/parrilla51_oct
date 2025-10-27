@@ -1397,31 +1397,46 @@ def mesas_empleado():
     return render_template('mesas_empleado.html')
 
 
-
-# ===================== Y ORDENES =====================
 @app.route('/orden/<int:mesa_id>', methods=['GET', 'POST'])
 def orden_mesa(mesa_id):
     cur = mysql.connection.cursor()
+    
     if request.method == 'POST':
         productos_seleccionados = request.form.getlist('producto')
         total = request.form.get('total', 0)
-        tipo_entrega = request.form.get('tipo_entrega', 'restaurante')
-        telefono = request.form.get('telefono', '')
-        metodo_pago = request.form.get('metodo_pago', 'efectivo')
 
+        # Validación: Asegurarse de que hay productos seleccionados
+        if not productos_seleccionados:
+            flash("Por favor, selecciona al menos un producto para realizar el pedido.", "error")
+            return redirect(url_for('orden_mesa', mesa_id=mesa_id))  # Redirige a la misma página si no hay productos
+
+        # Validación: Si el total no es proporcionado, lo calculamos sumando los precios de los productos seleccionados
+        if total == '0' or total == '':
+            total_calculado = 0
+            for producto_id in productos_seleccionados:
+                cur.execute("SELECT precio FROM productos_empleados WHERE id = %s", (producto_id,))
+                producto = cur.fetchone()
+                if producto:
+                    total_calculado += producto['precio']
+            total = total_calculado
+
+        # Insertar el pago en la tabla pagos_restaurante
         cur2 = mysql.connection.cursor()
-        for producto_id in productos_seleccionados:
-            cur2.execute("""
-                INSERT INTO pedidos (tipo_entrega, cod_mesa, fecha_pedi,
-                hora_pedi, metodo_pago, telefono, total, estado, cod_usuario)
-                VALUES (%s, %s, CURDATE(), CURTIME(), %s, %s, %s, %s, %s)
-            """, (tipo_entrega, mesa_id, metodo_pago, telefono, total,
-                  'pendiente', 0))
+        cur2.execute("""
+            INSERT INTO pagos_restaurante (id_mesa, fecha, hora, total)
+            VALUES (%s, CURDATE(), CURTIME(), %s)
+        """, (mesa_id, total))
         mysql.connection.commit()
         cur2.close()
         cur.close()
-        return redirect(url_for('mesas_empleado'))
 
+        # Flash mensaje de éxito
+        flash("Pedido realizado con éxito. El pago se ha registrado correctamente.", "success")
+        
+        # Redirigir a la página de mesas después del pago
+        return redirect(url_for('mesas_empleado'))
+    
+    # Obtener categorías y productos si se usa GET
     cur.execute("SELECT * FROM categorias_empleados")
     categorias = cur.fetchall()
 
@@ -1429,8 +1444,7 @@ def orden_mesa(mesa_id):
     productos = cur.fetchall()
 
     cur.close()
-    return render_template('calculadora.html', mesa=mesa_id,
-                           categorias=categorias, productos=productos)
+    return render_template('calculadora.html', mesa=mesa_id, categorias=categorias, productos=productos)
 
     
 from datetime import datetime
