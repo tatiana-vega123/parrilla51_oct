@@ -1350,15 +1350,52 @@ def registrar_pago_restaurante():
     finally:
         cur.close()
 
+# ==================== HISTORIAL DE PAGOS ====================
+from flask import request, render_template
+from datetime import datetime
+
+@app.route("/historial_pagos_restaurante", methods=["GET"])
+def historial_pagos_restaurante():
+    cur = mysql.connection.cursor()
+
+    # Parámetros de búsqueda
+    query = request.args.get("query", "").strip()
+
+    if query:
+        cur.execute("""
+            SELECT * FROM pagos_restaurante
+            WHERE CAST(id_pago_restaurante AS CHAR) LIKE %s
+               OR DATE_FORMAT(fecha, '%%Y-%%m-%%d') LIKE %s
+               OR hora LIKE %s
+            ORDER BY fecha DESC, hora DESC
+        """, (f"%{query}%", f"%{query}%", f"%{query}%"))
+    else:
+        cur.execute("SELECT * FROM pagos_restaurante ORDER BY fecha DESC, hora DESC")
+
+    pagos = cur.fetchall()
+
+    historial = []
+    for pago in pagos:
+        cur.execute("""
+            SELECT d.*, p.nombre
+            FROM detalle_pedido_restaurante d
+            JOIN productos_empleados p ON d.id_producto_em = p.id_producto_em
+            WHERE d.id_pago_restaurante = %s
+        """, (pago["id_pago_restaurante"],))
+        detalles = cur.fetchall()
+
+        pago["detalles"] = detalles
+        historial.append(pago)
+
+    cur.close()
+    return render_template("historial_pagos_restaurante.html", historial=historial)
+
 
 # ===================== MESAS Y ORDENES =====================
 @app.route('/mesas_empleado')
 def mesas_empleado():
     return render_template('mesas_empleado.html')
 
-@app.route('/historial_pagos_restaurante')
-def historial_pagos_restaurante():
-    return render_template('historial_pagos_restaurante.html')
 
 
 # ===================== Y ORDENES =====================
