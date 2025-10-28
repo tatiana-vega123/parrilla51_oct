@@ -1,3 +1,5 @@
+print("🔥 Cargando archivo app.py desde ruta activa")
+
 # app.py unificado (comentado por bloques y funciones)
 from flask import (
     Flask, render_template, request, redirect, url_for, session,
@@ -1027,13 +1029,12 @@ def agregar_carrito(id_producto):
 
 @app.route("/carrito", endpoint="cliente_carrito")
 def ver_carrito():
+    print("Ejecutando versión actualizada de ver_carrito")
+
     carrito = session.get("carrito", [])
     total = sum(item["precio"] * item["cantidad"] for item in carrito)
 
     cur = mysql.connection.cursor()
-
-    cur.execute("SELECT * FROM mesas WHERE estado='Disponible'")
-    mesas = cur.fetchall()
 
     cur.execute("""
         SELECT id_producto, nombre, precio, imagen
@@ -1047,7 +1048,6 @@ def ver_carrito():
     return render_template("cliente_carrito.html",
                            carrito=carrito,
                            total=total,
-                           mesas=mesas,
                            acompanamientos=acompanamientos)
 
 
@@ -1072,7 +1072,8 @@ def hacer_pedido():
 
     tipo_entrega = request.form.get("tipo_entrega", "restaurante")
     metodo_pago = request.form.get("metodo_pago", "efectivo")
-    cod_mesa = request.form.get("cod_mesa") if tipo_entrega == "restaurante" else None
+
+    # Si es domicilio, pedimos datos adicionales
     direccion = None
     telefono = None
     if tipo_entrega == "domicilio":
@@ -1085,14 +1086,14 @@ def hacer_pedido():
     cur.execute("""
         INSERT INTO pedidos (
             cod_usuario, fecha, hora, total, estado,
-            tipo_entrega, metodo_pago, cod_mesa, direccion, telefono
+            tipo_entrega, metodo_pago, direccion, telefono
         ) VALUES (
             %s, CURDATE(), CURTIME(), %s, 'pendiente',
-            %s, %s, %s, %s, %s
+            %s, %s, %s, %s
         )
     """, (
         id_usuario, total, tipo_entrega, metodo_pago,
-        cod_mesa, direccion, telefono
+        direccion, telefono
     ))
     id_pedido = cur.lastrowid
 
@@ -1127,11 +1128,12 @@ def ver_pedidos():
     cur = mysql.connection.cursor()
     cur.execute("""
         SELECT id_pedido, cod_usuario, fecha, hora, total, estado,
-        tipo_entrega, metodo_pago, cod_mesa
+               tipo_entrega, metodo_pago, direccion, telefono
         FROM pedidos ORDER BY id_pedido DESC
     """)
     pedidos = cur.fetchall()
     return render_template("mis_pedidos.html", pedidos=pedidos)
+
 
 
 # Eliminar producto del carrito
