@@ -1676,6 +1676,11 @@ def actualizar_estado(id_pedido):
         "id_pedido": id_pedido,
         "nuevo_estado": nuevo_estado
     })
+    
+#====================== Perfil empleado =============
+@app.route('/perfil_empleado')
+def perfil_empleado():
+    return render_template('perfil_empleado.html')
 
 # ===================== API JSON =====================
 
