@@ -3,22 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registrar Productos y Categorías</title>
+  <title>Productos y Categorías</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <style>
     html, body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       background-color: #3a3a3a;
       color: #f0f0f0;
       margin: 0;
-      padding: 0; 
+      padding: 0;
       height: 100%;
-      margin: 0;
       display: flex;
       flex-direction: column;
     }
-
     .navbar {
       display: flex;
       align-items: center;
@@ -36,42 +33,36 @@
       color: #ff4444;
     }
     .logo img { height: 40px; }
-    .nav-links {
-      list-style: none;
-      display: flex;
-      gap: 25px;
-      margin: 0;
-      padding: 0;
-    }
+    .nav-links { list-style: none; display: flex; gap: 25px; margin: 0; padding: 0; }
     .nav-links li a { color: #fff; text-decoration: none; }
     .nav-links li a:hover { color: #ffd700; }
-    .btn-success { background-color: #ffd700; color: #000; border: none; font-weight: bold; }
-    .btn-success:hover { background-color: #e6b800; }
-    .btn-primary { background-color: #ff4444; color: #fff; border: none; font-weight: bold; }
-    .btn-primary:hover { background-color: #e63b3b; }
-    .btn-warning { color: #000; }
     .list-group-item {
       background-color: #4a4a4a;
       color: #f0f0f0;
       border: 1px solid #ffd700;
       margin-bottom: 5px;
       border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .modal-content { background-color: #2f2f2f; color: #f0f0f0; border-radius: 10px; }
-    .modal-title { color: #ffd700; }
-    .form-control, .form-select, textarea {
-      background-color: #4a4a4a;
-      color: #f0f0f0;
-      border: 1px solid #ffd700;
+    .estado-btn {
+      padding: 3px 10px;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      font-weight: bold;
     }
-
+    .disponible { background-color: #28a745; }  /* verde */
+    .no-disponible { background-color: #dc3545; } /* rojo */
     footer {
       background: #2f2f2f;
       color: #fff;
       text-align: center;
       padding: 10px;
       border-top: 2px solid #ffd700;
-      margin-top: auto; /* Esto asegura que el pie de página esté en la parte inferior */
+      margin-top: auto;
     }
   </style>
 </head>
@@ -97,209 +88,147 @@
       <!-- CATEGORÍAS -->
       <div class="col-6 border-end">
         <h4 class="text-center mb-3">Categorías</h4>
-        <ul id="listaCategorias" class="list-group mb-3">
+        <ul id="listaCategorias" class="list-group">
           {% for c in categorias %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            {{ c.nombre_categoria }}
-            <div>
-              <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalEliminar{{ c.id_categoria_em }}">Eliminar</a>
-              <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditarCategoria{{ c.id_categoria_em }}">Editar</button>
-            </div>
-          </li>
-
-          <!-- Modal Editar Categoría -->
-          <div class="modal fade" id="modalEditarCategoria{{ c.id_categoria_em }}" tabindex="-1">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <form method="POST" action="{{ url_for('editar_categoria', id_categoria_em=c.id_categoria_em) }}">
-                  <div class="modal-header">
-                    <h5 class="modal-title">Editar Categoría</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                  </div>
-                  <div class="modal-body">
-                    <input type="text" name="nombre_categoria" class="form-control" value="{{ c.nombre_categoria }}" required>
-                  </div>
-                  <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar cambios</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          <!-- Modal Confirmación Eliminar Categoría -->
-          <div class="modal fade" id="modalEliminar{{ c.id_categoria_em }}" tabindex="-1">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Confirmar Eliminación</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                  <p>¿Estás seguro de que deseas eliminar la categoría <strong>{{ c.nombre_categoria }}</strong>?</p>
-                </div>
-                <div class="modal-footer">
-                  <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                  <a href="{{ url_for('eliminar_categoria', id_categoria_em=c.id_categoria_em) }}" class="btn btn-danger">Eliminar</a>
-                </div>
-              </div>
-            </div>
-          </div>
+          <li class="list-group-item" data-categoria="{{ c.id_categoria }}">{{ c.nombre_categoria }}</li>
           {% endfor %}
         </ul>
-        <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#modalCategoria">
-          + Agregar Categoría
-        </button>
       </div>
 
       <!-- PRODUCTOS -->
       <div class="col-6">
         <h4 class="text-center mb-3">Productos</h4>
-        <ul id="listaProductos" class="list-group mb-3">
-          {% for p in productos %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            {{ p.nombre }} - ${{ "{:,.0f}".format(p.precio) }} [{{ p.nombre_categoria }}]
-            <div>
-              <a href="#" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#modalEliminarProducto{{ p.id_producto_em }}">Eliminar</a>
-              <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditarProducto{{ p.id_producto_em }}">Editar</button>
-            </div>
-          </li>
-
-          <!-- Modal Editar Producto -->
-          <div class="modal fade" id="modalEditarProducto{{ p.id_producto_em }}" tabindex="-1">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <form method="POST" action="{{ url_for('editar_producto_empleado', id_producto_em=p.id_producto_em) }}">
-                  <div class="modal-header">
-                    <h5 class="modal-title">Editar Producto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                  </div>
-                  <div class="modal-body">
-                    <div class="mb-2">
-                      <label>Nombre</label>
-                      <input type="text" name="nombre" class="form-control" value="{{ p.nombre }}" required>
-                    </div>
-                    <div class="mb-2">
-                      <label>Precio</label>
-                      <input type="number" step="0.01" name="precio" class="form-control" value="{{ p.precio }}" required>
-                    </div>
-                    <div class="mb-2">
-                      <label>Descripción - Notas</label>
-                      <textarea name="descripcion" class="form-control">{{ p.descripcion }}</textarea>
-                    </div>
-                    <div class="mb-2">
-                      <label>Categoría</label>
-                      <select name="id_categoria_em" class="form-select">
-                        {% for c in categorias %}
-                        <option value="{{ c.id_categoria_em }}" {% if c.nombre_categoria == p.nombre_categoria %}selected{% endif %}>
-                          {{ c.nombre_categoria }}
-                        </option>
-                        {% endfor %}
-                      </select>
-                    </div>
-                  </div>
-                  <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar cambios</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-
-          <!-- Modal Confirmación Eliminar Producto -->
-          <div class="modal fade" id="modalEliminarProducto{{ p.id_producto_em }}" tabindex="-1">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Confirmar Eliminación</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                  <p>¿Estás seguro de que deseas eliminar el producto <strong>{{ p.nombre }}</strong>?</p>
-                </div>
-                <div class="modal-footer">
-                  <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                  <a href="{{ url_for('eliminar_producto_empleado', id_producto_em=p.id_producto_em) }}" class="btn btn-danger">Eliminar</a>
-                </div>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </ul>
-        <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#modalProducto">
-          + Agregar Producto
-        </button>
+        <ul id="listaProductos" class="list-group"></ul>
       </div>
     </div>
   </div>
 
-  <!-- MODAL CATEGORÍA NUEVA -->
-  <div class="modal fade" id="modalCategoria" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form method="POST" action="{{ url_for('agregar_categoria') }}">
-          <div class="modal-header">
-            <h5 class="modal-title">Nueva Categoría</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <input type="text" name="nombre_categoria" class="form-control" placeholder="Nombre de la categoría" required>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-success">Guardar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL PRODUCTO NUEVO -->
-  <div class="modal fade" id="modalProducto" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form method="POST" action="{{ url_for('agregar_producto_empleado') }}">
-          <div class="modal-header">
-            <h5 class="modal-title">Agregar Producto</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="nombre" class="form-label">Nombre del Producto</label>
-              <input type="text" id="nombre" name="nombre" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label for="precio" class="form-label">Precio</label>
-              <input type="number" id="precio" name="precio" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label for="descripcion" class="form-label">Descripción</label>
-            <textarea id="descripcion" name="descripcion" class="form-control" placeholder=""></textarea>
-            </div>
-            <div class="mb-3">
-              <label for="id_categoria_em" class="form-label">Categoría</label>
-              <select name="id_categoria_em" id="id_categoria_em" class="form-select" required>
-                {% for categoria in categorias %}
-                  <option value="{{ categoria.id_categoria_em }}">{{ categoria.nombre_categoria }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Agregar Producto</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <footer>
+  <footer>
     © 2025 Parrilla 51 - Todos los derechos reservados
   </footer>
+
+  <!-- MODAL CAMBIO DE ESTADO -->
+  <div class="modal fade" id="estadoModal" tabindex="-1" aria-labelledby="estadoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title" id="estadoModalLabel">Cambiar estado del producto</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p id="productoSeleccionado"></p>
+          <p>Selecciona el nuevo estado:</p>
+          <button class="btn btn-success me-2" id="btnDisponible">Disponible</button>
+          <button class="btn btn-danger" id="btnNoDisponible">No disponible</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // 🔹 Datos desde Flask
+    const productos = [
+      {% for p in productos %}
+      {
+        id: {{ p.id_producto }},
+        nombre: "{{ p.nombre }}",
+        precio: {{ p.precio }},
+        categoria: {{ p.id_categoria | default(0) }},
+        nombre_categoria: "{{ p.nombre_categoria }}",
+        estado: "{{ p.estado or 'Disponible' }}" // ✅ ahora lee el valor real desde MySQL
+      }{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+
+    const listaCategorias = document.getElementById('listaCategorias');
+    const listaProductos = document.getElementById('listaProductos');
+    let productoActual = null;
+    const modal = new bootstrap.Modal(document.getElementById('estadoModal'));
+    const productoSeleccionado = document.getElementById('productoSeleccionado');
+
+    // Mostrar productos por categoría
+    listaCategorias.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('list-group-item')) return;
+
+      listaCategorias.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
+      e.target.classList.add('active');
+
+      const idCategoria = parseInt(e.target.getAttribute('data-categoria'));
+      const filtrados = productos.filter(p => p.categoria === idCategoria);
+
+      listaProductos.innerHTML = '';
+
+      if (filtrados.length === 0) {
+        const li = document.createElement('li');
+        li.classList.add('list-group-item');
+        li.textContent = "No hay productos en esta categoría.";
+        listaProductos.appendChild(li);
+        return;
+      }
+
+      filtrados.forEach(p => {
+        const li = document.createElement('li');
+        li.classList.add('list-group-item');
+
+        const span = document.createElement('span');
+        span.textContent = `${p.nombre} - $${p.precio.toLocaleString()} [${p.nombre_categoria}]`;
+
+        const btn = document.createElement('button');
+        btn.classList.add('estado-btn', p.estado === 'Disponible' ? 'disponible' : 'no-disponible');
+        btn.textContent = p.estado;
+        btn.onclick = () => {
+          productoActual = p;
+          productoSeleccionado.textContent = `Producto: ${p.nombre}`;
+          modal.show();
+        };
+
+        li.appendChild(span);
+        li.appendChild(btn);
+        listaProductos.appendChild(li);
+      });
+    });
+
+    // 🔹 Botones del modal
+    document.getElementById('btnDisponible').addEventListener('click', () => cambiarEstado('Disponible'));
+    document.getElementById('btnNoDisponible').addEventListener('click', () => cambiarEstado('No disponible'));
+
+    function cambiarEstado(nuevoEstado) {
+      if (!productoActual) return;
+
+      // Actualizar en la base de datos
+      fetch('/actualizar_estado_producto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id_producto: productoActual.id,
+          estado: nuevoEstado
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          productoActual.estado = nuevoEstado;
+          actualizarBotonVisual(productoActual);
+        } else {
+          alert('Error al actualizar estado: ' + data.msg);
+        }
+      })
+      .catch(err => alert('Error: ' + err));
+
+      modal.hide();
+    }
+
+    function actualizarBotonVisual(p) {
+      const botones = document.querySelectorAll('.estado-btn');
+      botones.forEach(btn => {
+        if (btn.parentElement.firstChild.textContent.includes(p.nombre)) {
+          btn.textContent = p.estado;
+          btn.classList.remove('disponible', 'no-disponible');
+          btn.classList.add(p.estado === 'Disponible' ? 'disponible' : 'no-disponible');
+        }
+      });
+    }
+  </script>
 </body>
 </html>

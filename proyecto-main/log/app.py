@@ -1166,132 +1166,98 @@ def eliminar_carrito(id_producto):
 # ===================== LISTAR PRODUCTOS Y CATEGORÍAS =====================
 
 
+from flask import render_template, request, jsonify
+import MySQLdb.cursors  # 👈 necesario para usar DictCursor
+
 @app.route("/registrar_empleado")
 def registrar_empleado():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT id_categoria_em, nombre_categoria FROM categorias_empleados")
-    categorias = cur.fetchall()
+
+    # 🔹 Obtener categorías
+    cur.execute("SELECT id_categoria, nombre_categoria FROM categorias")
+    categorias_raw = cur.fetchall()
+
+    categorias = []
+    for c in categorias_raw:
+        if isinstance(c, dict):
+            categorias.append({
+                'id_categoria': c.get('id_categoria'),
+                'nombre_categoria': c.get('nombre_categoria')
+            })
+        else:
+            categorias.append({
+                'id_categoria': c[0],
+                'nombre_categoria': c[1]
+            })
+
+    # 🔹 Obtener productos (ahora incluye el campo estado)
     cur.execute("""
-        SELECT p.id_producto_em, p.nombre, p.precio, p.descripcion,
-        c.nombre_categoria
-        FROM productos_empleados p
-        JOIN categorias_empleados c ON p.id_categoria_em = c.id_categoria_em
+        SELECT 
+            p.id_producto, 
+            p.nombre, 
+            p.precio, 
+            p.cod_categoria AS id_categoria, 
+            p.estado,  -- 👈 se agregó
+            c.nombre_categoria
+        FROM productos p
+        LEFT JOIN categorias c ON p.cod_categoria = c.id_categoria
     """)
-    productos = cur.fetchall()
-    cur.close()
-    return render_template("registrar_empleado.html", productos=productos,
-                           categorias=categorias)
+    productos_raw = cur.fetchall()
 
-
-# ===================== AGREGAR CATEGORÍA =====================
-@app.route("/agregar_categoria", methods=["POST"])
-def agregar_categoria():
-    nombre_categoria = request.form["nombre_categoria"]
-
-    cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO categorias_empleados (nombre_categoria) VALUES (%s)",
-                (nombre_categoria,))
-    mysql.connection.commit()
-    cur.close()
-
-    return redirect(url_for("registrar_empleado"))
-
-
-# ===================== EDITAR CATEGORÍA =====================
-@app.route("/editar_categoria/<int:id_categoria_em>", methods=["POST"])
-def editar_categoria(id_categoria_em):
-    nombre_categoria = request.form["nombre_categoria"]
-    cur = mysql.connection.cursor()
-    cur.execute(
-        "UPDATE categorias_empleados SET nombre_categoria=%s WHERE id_categoria_em=%s",
-        (nombre_categoria, id_categoria_em)
-    )
-    mysql.connection.commit()
-    cur.close()
-
-    return redirect(url_for("registrar_empleado"))
-
-# ===================== ELIMINAR CATEGORÍA =====================
-@app.route("/eliminar_categoria/<int:id_categoria_em>")
-def eliminar_categoria(id_categoria_em):
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM categorias_empleados WHERE id_categoria_em = %s",
-                (id_categoria_em,))
-    mysql.connection.commit()
-    cur.close()
-    return redirect(url_for("registrar_empleado"))
-
-
-# ===================== AGREGAR PRODUCTO =====================
-@app.route("/agregar_producto_em", methods=["POST"])
-def agregar_producto_empleado():
-    nombre = request.form["nombre"]
-    precio = request.form["precio"]
-    descripcion = request.form["descripcion"]
-    id_categoria_em = request.form["id_categoria_em"]
-
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT id_categoria_em FROM categorias_empleados WHERE id_categoria_em = %s", (id_categoria_em,))
-    categoria = cur.fetchone()
-
-    if not categoria:
-        return "Error: La categoría no existe", 400  # Si no existe la categoría, mostramos un error
-
-    cur.execute("""
-        INSERT INTO productos_empleados (nombre, precio, descripcion, id_categoria_em)
-        VALUES (%s, %s, %s, %s)
-    """, (nombre, precio, descripcion, id_categoria_em))
-    mysql.connection.commit()
-    cur.close()
-
-    return redirect(url_for("registrar_empleado"))
-
-
-# ===================== EDITAR PRODUCTO =====================
-@app.route("/editar_producto_em/<int:id_producto_em>", methods=["POST"])
-def editar_producto_empleado(id_producto_em):
-    nombre = request.form["nombre"]
-    precio = request.form["precio"]
-    descripcion = request.form["descripcion"]
-    id_categoria_em = request.form["id_categoria_em"]
-
-    cur = mysql.connection.cursor()
-    cur.execute("""
-        UPDATE productos_empleados
-        SET nombre=%s, precio=%s, descripcion=%s, id_categoria_em=%s
-        WHERE id_producto_em=%s
-    """, (nombre, precio, descripcion, id_categoria_em, id_producto_em))
-    mysql.connection.commit()
-    cur.close()
-
-    return redirect(url_for("registrar_empleado"))
-
-# ===================== ELIMINAR PRODUCTO =====================
-@app.route("/eliminar_producto_em/<int:id_producto_em>")
-def eliminar_producto_empleado(id_producto_em):
-    cur = mysql.connection.cursor()
-    cur.execute("DELETE FROM productos_empleados WHERE id_producto_em = %s",
-                (id_producto_em,))
-    mysql.connection.commit()
-    cur.close()
-    return redirect(url_for("registrar_empleado"))
-
-
-
-# ===================== CALCULADORA =====================
-@app.route("/calculadora")
-def calculadora():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM categorias_empleados")
-    categorias = cur.fetchall()
-
-    cur.execute("SELECT * FROM productos_empleados")
-    productos = cur.fetchall()
+    productos = []
+    for p in productos_raw:
+        if isinstance(p, dict):
+            productos.append({
+                'id_producto': p.get('id_producto'),
+                'nombre': p.get('nombre'),
+                'precio': p.get('precio'),
+                'id_categoria': p.get('id_categoria'),
+                'nombre_categoria': p.get('nombre_categoria'),
+                'estado': p.get('estado', 'Disponible')  # 👈 por si viene NULL
+            })
+        else:
+            productos.append({
+                'id_producto': p[0],
+                'nombre': p[1],
+                'precio': p[2],
+                'id_categoria': p[3],
+                'estado': p[4] if len(p) > 4 else 'Disponible',
+                'nombre_categoria': p[5] if len(p) > 5 else ''
+            })
 
     cur.close()
-    return render_template("calculadora.html", categorias=categorias,
-                           productos=productos)
 
+    # 🚀 Debug opcional (puedes quitarlo si todo anda bien)
+    print("=== PRODUCTOS NORMALIZADOS ===")
+    for p in productos:
+        print(p)
+
+    return render_template("registrar_empleado.html", productos=productos, categorias=categorias)
+
+
+# 🔹 Actualizar estado del producto
+@app.route("/actualizar_estado_producto", methods=["POST"])
+def actualizar_estado_producto():
+    data = request.get_json()
+    id_producto = data.get("id_producto")
+    nuevo_estado = data.get("estado")
+
+    if not id_producto or not nuevo_estado:
+        return jsonify({"success": False, "msg": "Datos incompletos"}), 400
+
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            UPDATE productos 
+            SET estado = %s 
+            WHERE id_producto = %s
+        """, (nuevo_estado, id_producto))
+        mysql.connection.commit()
+        cur.close()
+        return jsonify({"success": True, "nuevo_estado": nuevo_estado})
+    except Exception as e:
+        mysql.connection.rollback()
+        return jsonify({"success": False, "msg": str(e)}), 500
 
 # ==================== Registrar pagos ==============
 
@@ -1331,11 +1297,11 @@ def registrar_pago_restaurante():
         for p in productos:
             cur.execute("""
                 INSERT INTO detalle_pedido_restaurante 
-                (id_pago_restaurante, id_producto_em, cantidad, precio_unitario)
+                (id_pago_restaurante, id_producto, cantidad, precio_unitario)
                 VALUES (%s, %s, %s, %s)
             """, (
                 id_pago_restaurante,
-                p['id_producto_em'],
+                p['id_producto'],
                 p['cantidad'],
                 p['precio']
             ))
@@ -1381,7 +1347,7 @@ def historial_pagos_restaurante():
         cur.execute("""
             SELECT d.*, p.nombre
             FROM detalle_pedido_restaurante d
-            JOIN productos_empleados p ON d.id_producto_em = p.id_producto_em
+            JOIN productos p ON d.id_producto = p.id_producto
             WHERE d.id_pago_restaurante = %s
         """, (pago["id_pago_restaurante"],))
         detalles = cur.fetchall()
@@ -1416,7 +1382,7 @@ def orden_mesa(mesa_id):
         if total == '0' or total == '':
             total_calculado = 0
             for producto_id in productos_seleccionados:
-                cur.execute("SELECT precio FROM productos_empleados WHERE id = %s", (producto_id,))
+                cur.execute("SELECT precio FROM productos WHERE id = %s", (producto_id,))
                 producto = cur.fetchone()
                 if producto:
                     total_calculado += producto['precio']
@@ -1439,10 +1405,10 @@ def orden_mesa(mesa_id):
         return redirect(url_for('mesas_empleado'))
     
     # Obtener categorías y productos si se usa GET
-    cur.execute("SELECT * FROM categorias_empleados")
+    cur.execute("SELECT * FROM categorias")
     categorias = cur.fetchall()
 
-    cur.execute("SELECT * FROM productos_empleados")
+    cur.execute("SELECT * FROM productos")
     productos = cur.fetchall()
 
     cur.close()
@@ -1456,8 +1422,6 @@ from datetime import datetime
 from MySQLdb import IntegrityError 
 
 # ===================== RESERVAS empleado =====================
-
-
 
 @app.route("/agregar_reserva", methods=["POST"])
 def agregar_reserva():
