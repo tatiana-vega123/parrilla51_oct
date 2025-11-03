@@ -1259,41 +1259,57 @@ def actualizar_estado_producto():
         mysql.connection.rollback()
         return jsonify({"success": False, "msg": str(e)}), 500
 
-# ==================== Registrar pagos ==============
-
-
+# ==================== IMPORTS NECESARIOS ====================
+from flask import Flask, render_template, request, redirect, url_for, flash
 from datetime import datetime
-from flask import request, redirect, url_for, flash
 import json
 
-@app.route('/registrar_pago_restaurante', methods=['POST'])
-def registrar_pago_restaurante():
-    try:
-        # Obtener datos del formulario
-        id_mesa = request.form.get('id_mesa')
+# Aquí tienes que importar y configurar tu app y MySQL,
+# por ejemplo:
+# from flask_mysqldb import MySQL
+# app = Flask(__name__)
+# app.config['MYSQL_HOST'] = 'localhost'
+# app.config['MYSQL_USER'] = 'tu_usuario'
+# app.config['MYSQL_PASSWORD'] = 'tu_contraseña'
+# app.config['MYSQL_DB'] = 'tu_base_de_datos'
+# mysql = MySQL(app)
+
+# ==================== MESAS ====================
+@app.route('/mesas_empleado')
+def mesas_empleado():
+    return render_template('mesas_empleado.html')
+
+# ==================== ORDEN DE MESA ====================
+@app.route('/orden/<int:mesa_id>', methods=['GET', 'POST'])
+def orden_mesa(mesa_id):
+    
+    cur = mysql.connection.cursor()
+
+    if request.method == 'POST':
+        productos_json = request.form.get('productos', '[]')
         total = float(request.form.get('total', 0))
         dinero_cliente = float(request.form.get('dinero_cliente', 0))
-        productos_json = request.form.get('productos', '[]')
-        productos = json.loads(productos_json)
+
+        try:
+            productos = json.loads(productos_json)
+        except json.JSONDecodeError:
+            productos = []
+
+        if len(productos) == 0 or total <= 0:
+            flash("⚠️ No se seleccionaron productos válidos o el total es 0.", "error")
+            return redirect(url_for('orden_mesa', mesa_id=mesa_id))
 
         fecha = datetime.now().date()
         hora = datetime.now().strftime("%H:%M:%S")
 
-        # Validación básica
-        if not id_mesa or total <= 0 or len(productos) == 0:
-            flash("Datos de la orden incompletos.", "error")
-            return redirect(url_for('mesas_empleado'))
-
-        cur = mysql.connection.cursor()
-
-        # Insertar pago principal
+        # Insertar el pago principal
         cur.execute("""
             INSERT INTO pagos_restaurante (id_mesa, fecha, hora, total)
             VALUES (%s, %s, %s, %s)
-        """, (id_mesa, fecha, hora, total))
+        """, (mesa_id, fecha, hora, total))
         id_pago_restaurante = cur.lastrowid
 
-        # Insertar detalles de cada producto
+        # Insertar los detalles de productos
         for p in productos:
             cur.execute("""
                 INSERT INTO detalle_pedido_restaurante 
@@ -1307,26 +1323,26 @@ def registrar_pago_restaurante():
             ))
 
         mysql.connection.commit()
-        flash("✅ Pago registrado correctamente.", "success")
-        return redirect(url_for('mesas_empleado'))
-
-    except Exception as e:
-        print("Error MySQL:", e)
-        flash(f"Error al registrar el pago: {e}", "error")
-        return redirect(url_for('mesas_empleado'))
-
-    finally:
         cur.close()
 
-# ==================== HISTORIAL DE PAGOS ====================
-from flask import request, render_template
-from datetime import datetime
+        flash("✅ Pago registrado correctamente y guardado en historial.", "success")
+        return redirect(url_for('mesas_empleado'))
 
+    # Si es un GET, mostrar productos y categorías
+    cur.execute("SELECT * FROM categorias")
+    categorias = cur.fetchall()
+
+    cur.execute("SELECT * FROM productos")
+    productos = cur.fetchall()
+
+    cur.close()
+    return render_template('calculadora.html', mesa=mesa_id, categorias=categorias, productos=productos)
+
+# ==================== HISTORIAL DE PAGOS ====================
 @app.route("/historial_pagos_restaurante", methods=["GET"])
 def historial_pagos_restaurante():
     cur = mysql.connection.cursor()
 
-    # Parámetros de búsqueda
     query = request.args.get("query", "").strip()
 
     if query:
@@ -1341,8 +1357,8 @@ def historial_pagos_restaurante():
         cur.execute("SELECT * FROM pagos_restaurante ORDER BY fecha DESC, hora DESC")
 
     pagos = cur.fetchall()
-
     historial = []
+
     for pago in pagos:
         cur.execute("""
             SELECT d.*, p.nombre
@@ -1357,62 +1373,6 @@ def historial_pagos_restaurante():
 
     cur.close()
     return render_template("historial_pagos_restaurante.html", historial=historial)
-
-
-# ===================== MESAS Y ORDENES =====================
-@app.route('/mesas_empleado')
-def mesas_empleado():
-    return render_template('mesas_empleado.html')
-
-
-@app.route('/orden/<int:mesa_id>', methods=['GET', 'POST'])
-def orden_mesa(mesa_id):
-    cur = mysql.connection.cursor()
-    
-    if request.method == 'POST':
-        productos_seleccionados = request.form.getlist('producto')
-        total = request.form.get('total', 0)
-
-        # Validación: Asegurarse de que hay productos seleccionados
-        if not productos_seleccionados:
-            flash("Por favor, selecciona al menos un producto para realizar el pedido.", "error")
-            return redirect(url_for('orden_mesa', mesa_id=mesa_id))  # Redirige a la misma página si no hay productos
-
-        # Validación: Si el total no es proporcionado, lo calculamos sumando los precios de los productos seleccionados
-        if total == '0' or total == '':
-            total_calculado = 0
-            for producto_id in productos_seleccionados:
-                cur.execute("SELECT precio FROM productos WHERE id = %s", (producto_id,))
-                producto = cur.fetchone()
-                if producto:
-                    total_calculado += producto['precio']
-            total = total_calculado
-
-        # Insertar el pago en la tabla pagos_restaurante
-        cur2 = mysql.connection.cursor()
-        cur2.execute("""
-            INSERT INTO pagos_restaurante (id_mesa, fecha, hora, total)
-            VALUES (%s, CURDATE(), CURTIME(), %s)
-        """, (mesa_id, total))
-        mysql.connection.commit()
-        cur2.close()
-        cur.close()
-
-        # Flash mensaje de éxito
-        flash("Pedido realizado con éxito. El pago se ha registrado correctamente.", "success")
-        
-        # Redirigir a la página de mesas después del pago
-        return redirect(url_for('mesas_empleado'))
-    
-    # Obtener categorías y productos si se usa GET
-    cur.execute("SELECT * FROM categorias")
-    categorias = cur.fetchall()
-
-    cur.execute("SELECT * FROM productos")
-    productos = cur.fetchall()
-
-    cur.close()
-    return render_template('calculadora.html', mesa=mesa_id, categorias=categorias, productos=productos)
 
     
 from datetime import datetime
